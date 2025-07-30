@@ -5,6 +5,22 @@ CREATE DATABASE IF NOT EXISTS marhar345_merlin
   CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE marhar345_merlin;
 
+-- Prompt sets to allow different base instructions
+CREATE TABLE IF NOT EXISTS prompt_sets (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Messages belonging to each prompt set
+CREATE TABLE IF NOT EXISTS prompt_lines (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    set_id INT NOT NULL,
+    role ENUM('system','assistant','user') NOT NULL,
+    content TEXT NOT NULL,
+    orden INT DEFAULT 0,
+    FOREIGN KEY (set_id) REFERENCES prompt_sets(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Table of users
 CREATE TABLE IF NOT EXISTS usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -16,7 +32,9 @@ CREATE TABLE IF NOT EXISTS usuarios (
     password     VARCHAR(255) NOT NULL,
     foto         VARCHAR(255),
     es_admin     TINYINT(1) DEFAULT 0,
-    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    prompt_set_id INT DEFAULT NULL,
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (prompt_set_id) REFERENCES prompt_sets(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Design preferences
@@ -74,23 +92,3 @@ CREATE TABLE IF NOT EXISTS resultados_analisis (
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Prompt sets to allow different base instructions
-CREATE TABLE IF NOT EXISTS prompt_sets (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Messages belonging to each prompt set
-CREATE TABLE IF NOT EXISTS prompt_lines (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    set_id INT NOT NULL,
-    role ENUM('system','assistant','user') NOT NULL,
-    content TEXT NOT NULL,
-    orden INT DEFAULT 0,
-    FOREIGN KEY (set_id) REFERENCES prompt_sets(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-ALTER TABLE usuarios
-    ADD COLUMN prompt_set_id INT DEFAULT NULL,
-    ADD CONSTRAINT fk_prompt_set
-        FOREIGN KEY (prompt_set_id) REFERENCES prompt_sets(id);
