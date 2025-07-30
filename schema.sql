@@ -88,6 +88,14 @@ CREATE TABLE IF NOT EXISTS prompt_lines (
     FOREIGN KEY (set_id) REFERENCES prompt_sets(id) ON DELETE CASCADE
 );
 
+-- Password reset tokens for recovery process
+CREATE TABLE IF NOT EXISTS password_resets (
+    usuario_id INT PRIMARY KEY,
+    token VARCHAR(64) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+
 ALTER TABLE usuarios
     ADD COLUMN IF NOT EXISTS prompt_set_id INT DEFAULT NULL,
     ADD CONSTRAINT fk_prompt_set
