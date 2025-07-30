@@ -91,6 +91,6 @@ CREATE TABLE IF NOT EXISTS prompt_lines (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 ALTER TABLE usuarios
-    ADD COLUMN IF NOT EXISTS prompt_set_id INT DEFAULT NULL,
+    ADD COLUMN prompt_set_id INT DEFAULT NULL,
     ADD CONSTRAINT fk_prompt_set
         FOREIGN KEY (prompt_set_id) REFERENCES prompt_sets(id);
