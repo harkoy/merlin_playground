@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     telefono     VARCHAR(50) UNIQUE,
     password     VARCHAR(255) NOT NULL,
     foto         VARCHAR(255),
+    es_admin     TINYINT(1) DEFAULT 0,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

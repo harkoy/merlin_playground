@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Ya existe un usuario con ese email o teléfono.';
     } else {
         $hash = password_hash($password, PASSWORD_BCRYPT);
-        $stmt = $pdo->prepare("INSERT INTO usuarios (nombre, apellido, empresa, email, telefono, password) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO usuarios (nombre, apellido, empresa, email, telefono, password, es_admin) VALUES (?, ?, ?, ?, ?, ?, 0)");
         $stmt->execute([$nombre, $apellido, $empresa, $email, $telefono, $hash]);
         header('Location: login.php');
         exit;
