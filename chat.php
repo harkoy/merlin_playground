@@ -40,6 +40,19 @@ if (!$conver) {
     $conver_id = $conver['id'];
 }
 
+// Borrar mensaje si el usuario lo solicita
+if (isset($_GET['del_msg'])) {
+    $delId = (int)$_GET['del_msg'];
+    $stmt = $pdo->prepare('SELECT m.id FROM mensajes m JOIN conversaciones c ON m.conversacion_id = c.id WHERE m.id = ? AND c.usuario_id = ? LIMIT 1');
+    $stmt->execute([$delId, $usuario_id]);
+    if ($stmt->fetch()) {
+        $del = $pdo->prepare('DELETE FROM mensajes WHERE id = ?');
+        $del->execute([$delId]);
+    }
+    header('Location: chat.php');
+    exit;
+}
+
 // Enviar mensaje
 if (isset($_POST['mensaje']) && trim($_POST['mensaje']) !== '') {
     $mensaje = trim($_POST['mensaje']);
@@ -68,7 +81,7 @@ if (isset($_POST['mensaje']) && trim($_POST['mensaje']) !== '') {
 }
 
 // Obtener mensajes para mostrar
-$stmt = $pdo->prepare("SELECT emisor, texto, fecha_envio FROM mensajes WHERE conversacion_id = ? ORDER BY id");
+$stmt = $pdo->prepare("SELECT id, emisor, texto, fecha_envio FROM mensajes WHERE conversacion_id = ? ORDER BY id");
 $stmt->execute([$conver_id]);
 $mensajes = $stmt->fetchAll();
 ?>
@@ -80,10 +93,15 @@ $mensajes = $stmt->fetchAll();
 <style>
 body.light { background: #fff; color: #000; }
 body.dark { background: #121212; color: #eee; }
+body { padding-bottom: 80px; }
 .user { text-align: right; }
 .message { margin: 5px 0; padding: 8px; border-radius: 4px; max-width: 70%; }
 .user .message { background: <?php echo htmlspecialchars($pref['color_preferido']); ?>; color: #fff; margin-left: auto; }
 .assistant .message { background: #ccc; color: #000; }
+#chat-window { height: 300px; overflow-y: auto; border: 1px solid #999; padding: 10px; margin-bottom: 70px; }
+#input-area { position: fixed; bottom: 0; left: 0; width: 100%; padding: 10px; background: inherit; }
+#input-area form { display: flex; }
+#input-area input[type="text"] { flex: 1; }
 </style>
 </head>
 <body class="<?php echo htmlspecialchars($pref['tema']); ?>">
@@ -97,20 +115,23 @@ body.dark { background: #121212; color: #eee; }
     Color: <input type="color" name="color" value="<?php echo htmlspecialchars($pref['color_preferido']); ?>">
     <button type="submit">Guardar</button>
 </form>
-<div id="chat">
+<div id="chat-window">
 <?php foreach ($mensajes as $m): ?>
     <div class="<?php echo $m['emisor']; ?>">
         <div class="message">
             <?php echo nl2br(htmlspecialchars($m['texto'])); ?>
+            <a href="?del_msg=<?php echo $m['id']; ?>" style="font-size:smaller" onclick="return confirm('Eliminar mensaje?')">🗑</a>
         </div>
     </div>
 <?php endforeach; ?>
 </div>
-<form method="post">
-    <input name="mensaje" placeholder="Escribe un mensaje" style="width:80%;">
-    <button type="submit">Enviar</button>
-</form>
-<p>
+<div id="input-area">
+    <form method="post">
+        <input name="mensaje" placeholder="Escribe un mensaje" type="text">
+        <button type="submit">Enviar</button>
+    </form>
+</div>
+<p style="margin-top:1em;">
     <a href="profile.php">Mi perfil</a> |
     <a href="logout.php">Cerrar sesión</a>
 </p>
