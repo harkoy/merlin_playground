@@ -251,15 +251,15 @@ if ($selectedSet) {
             </div>
             
             <!-- Add New Question -->
-            <form method="post" class="form-inline" style="margin-bottom: 1.5rem;">
+            <form id="add-question-form" class="form-inline" style="margin-bottom: 1.5rem;">
                 <input type="text" name="new_question" class="form-input" placeholder="Escribe una nueva pregunta..." required>
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Agregar
                 </button>
             </form>
-            
+
             <?php if (!empty($questions)): ?>
-                <table class="data-table">
+                <table id="questions-table" class="data-table">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -269,32 +269,37 @@ if ($selectedSet) {
                     </thead>
                     <tbody>
                         <?php foreach ($questions as $q): ?>
-                        <tr>
-                            <form method="post">
-                                <td><?php echo $q['id']; ?></td>
-                                <td>
-                                    <input type="hidden" name="edit_id" value="<?php echo $q['id']; ?>">
-                                    <input type="text" name="edit_text" value="<?php echo htmlspecialchars($q['texto_pregunta']); ?>" class="form-input">
-                                </td>
-                                <td>
-                                    <div style="display: flex; gap: 0.5rem;">
-                                        <button type="submit" class="btn btn-success">
-                                            <i class="fas fa-save"></i> Guardar
-                                        </button>
-                                        <a href="?del_question=<?php echo $q['id']; ?>" 
-                                           class="btn btn-danger" 
-                                           onclick="return confirm('¿Eliminar esta pregunta?')">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </form>
+                        <tr data-id="<?php echo $q['id']; ?>">
+                            <td><?php echo $q['id']; ?></td>
+                            <td>
+                                <input type="text" class="form-input question-text" value="<?php echo htmlspecialchars($q['texto_pregunta']); ?>">
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <button type="button" class="btn btn-success btn-save" data-id="<?php echo $q['id']; ?>">
+                                        <i class="fas fa-save"></i> Guardar
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-del" data-id="<?php echo $q['id']; ?>">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
             <?php else: ?>
-                <div class="empty-state">
+                <table id="questions-table" class="data-table" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Pregunta</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <div id="questions-empty" class="empty-state">
                     <i class="fas fa-question-circle"></i>
                     <h3>No hay preguntas configuradas</h3>
                     <p>Agrega preguntas para que aparezcan en el sistema.</p>
@@ -452,9 +457,10 @@ if ($selectedSet) {
             <?php endif; ?>
         </div>
         <?php endif; ?>
-    </div>
+</div>
 </div>
 
+<script src="assets/js/questions.js"></script>
 <script>
 // Tab functionality
 function showTab(tabName) {
