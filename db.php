@@ -3,8 +3,8 @@
 
 $host = 'localhost';
 $db   = 'marhar345_merlin';
-$user = 'YOUR_DB_USER';
-$pass = 'YOUR_DB_PASSWORD';
+$user = 'marhar345_merlin';
+$pass = 'OaX94xS9q+';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
