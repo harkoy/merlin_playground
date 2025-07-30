@@ -1,6 +1,8 @@
 -- Database schema for the chat application
 -- Ensure you are using the marhar345_merlin database
 
+CREATE DATABASE IF NOT EXISTS marhar345_merlin
+  CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE marhar345_merlin;
 
 -- Table of users
@@ -16,6 +18,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     es_admin     TINYINT(1) DEFAULT 0,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Design preferences
 CREATE TABLE IF NOT EXISTS preferencias_disenio (
@@ -25,6 +28,7 @@ CREATE TABLE IF NOT EXISTS preferencias_disenio (
     color_preferido VARCHAR(50),
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Conversations
 CREATE TABLE IF NOT EXISTS conversaciones (
@@ -34,6 +38,7 @@ CREATE TABLE IF NOT EXISTS conversaciones (
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Messages
 CREATE TABLE IF NOT EXISTS mensajes (
@@ -44,6 +49,7 @@ CREATE TABLE IF NOT EXISTS mensajes (
     fecha_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (conversacion_id) REFERENCES conversaciones(id) ON DELETE CASCADE
 );
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Admin defined questions
 CREATE TABLE IF NOT EXISTS preguntas_admin (
@@ -51,6 +57,7 @@ CREATE TABLE IF NOT EXISTS preguntas_admin (
     texto_pregunta TEXT NOT NULL,
     orden INT DEFAULT 0
 );
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- User answers to admin questions
 CREATE TABLE IF NOT EXISTS respuestas (
@@ -62,6 +69,7 @@ CREATE TABLE IF NOT EXISTS respuestas (
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
     FOREIGN KEY (pregunta_id) REFERENCES preguntas_admin(id) ON DELETE CASCADE
 );
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Optional analysis results
 CREATE TABLE IF NOT EXISTS resultados_analisis (
@@ -71,12 +79,14 @@ CREATE TABLE IF NOT EXISTS resultados_analisis (
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Prompt sets to allow different base instructions
 CREATE TABLE IF NOT EXISTS prompt_sets (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL
 );
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Messages belonging to each prompt set
 CREATE TABLE IF NOT EXISTS prompt_lines (
@@ -87,8 +97,10 @@ CREATE TABLE IF NOT EXISTS prompt_lines (
     orden INT DEFAULT 0,
     FOREIGN KEY (set_id) REFERENCES prompt_sets(id) ON DELETE CASCADE
 );
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 ALTER TABLE usuarios
     ADD COLUMN IF NOT EXISTS prompt_set_id INT DEFAULT NULL,
+    ADD COLUMN prompt_set_id INT DEFAULT NULL,
     ADD CONSTRAINT fk_prompt_set
         FOREIGN KEY (prompt_set_id) REFERENCES prompt_sets(id);
