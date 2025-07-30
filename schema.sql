@@ -99,6 +99,14 @@ CREATE TABLE IF NOT EXISTS prompt_lines (
 );
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Password reset tokens for recovery process
+CREATE TABLE IF NOT EXISTS password_resets (
+    usuario_id INT PRIMARY KEY,
+    token VARCHAR(64) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+
 ALTER TABLE usuarios
     ADD COLUMN IF NOT EXISTS prompt_set_id INT DEFAULT NULL,
     ADD COLUMN prompt_set_id INT DEFAULT NULL,

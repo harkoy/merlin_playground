@@ -32,10 +32,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // prompt set operations
-    if (isset($_POST['add_set'])) {
+    if (isset($_POST['add_set']) || isset($_POST['new_set_name'])) {
         $stmt = $pdo->prepare('INSERT INTO prompt_sets (nombre) VALUES (?)');
         $stmt->execute([$_POST['new_set_name']]);
-        $selectedSet = $pdo->lastInsertId();
+        $newId = $pdo->lastInsertId();
+        header('Location: admin.php?prompt_set=' . $newId . '&success=1');
+        exit;
     }
     if (isset($_POST['rename_set'])) {
         $stmt = $pdo->prepare('UPDATE prompt_sets SET nombre = ? WHERE id = ?');
