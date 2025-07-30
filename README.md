@@ -14,7 +14,7 @@ Antes de usar la aplicación, importa `schema.sql` en tu base de datos (por ejem
 Para que la API funcione necesitas definir la variable de entorno `OPENAI_API_KEY` con tu clave privada.
 
 ## Preguntas iniciales y prompts
-- `prompts.php` contiene las instrucciones y preguntas base que se envían a la API cuando un usuario inicia la conversación.
-- `init_prompts.php` carga esas preguntas en la tabla `preguntas_admin` si quieres mantener un registro en la base de datos.
+`prompts.php` contiene las instrucciones y preguntas base que se envían a la API cuando un usuario inicia la conversación. Puedes ejecutar `php prompts.php` para mostrarlas por consola.
+`init_prompts.php` carga esas preguntas en la tabla `preguntas_admin` si quieres mantener un registro en la base de datos.
 
 Ejecuta `php init_prompts.php` una vez para pre-cargar las preguntas.
