@@ -55,11 +55,10 @@ if (isset($_POST['mensaje']) && trim($_POST['mensaje']) !== '') {
         $messages[] = ['role' => $m['emisor'] === 'usuario' ? 'user' : 'assistant', 'content' => $m['texto']];
     }
 
-    // Prompt inicial si es el primer mensaje
+    // Prompt inicial y preguntas base si es el primer mensaje
     if (count($messages) === 1) {
-        $messages = array_merge([
-            ['role' => 'system', 'content' => 'Eres un asistente que realiza una encuesta de forma amena para comprender el negocio del usuario. Informa que las respuestas se guardarán y se utiliza la API de OpenAI.']
-        ], $messages);
+        $basePrompts = include 'prompts.php';
+        $messages = array_merge($basePrompts, $messages);
     }
 
     $respuesta = call_openai_api($messages);
