@@ -6,7 +6,7 @@ Este proyecto contiene un ejemplo sencillo de chat en PHP que utiliza la API de 
 - `db.php`: conexión PDO a la base de datos `marhar345_merlin`.
 - `schema.sql`: script para crear la estructura de tablas.
 - `register.php` / `login.php` / `logout.php`: autenticación básica.
-- `admin.php`: panel protegido para gestionar usuarios, preguntas y asignar un conjunto de prompts a cada uno.
+- `admin.php`: panel protegido para gestionar usuarios, preguntas y administrar los conjuntos de prompts.
 - `chat.php`: interfaz conversacional que almacena cada mensaje y consulta la API de OpenAI.
 - `openai.php`: función helper para comunicarse con la API.
 
@@ -15,10 +15,10 @@ Antes de usar la aplicación, importa `schema.sql` en tu base de datos (por ejem
 Para que la API funcione necesitas definir la variable de entorno `OPENAI_API_KEY` con tu clave privada.
 
 ## Preguntas iniciales y prompts
-`prompts.php` define distintos conjuntos de mensajes iniciales. Ejecuta `php prompts.php` para verlos por consola.
-`init_prompts.php` carga esos conjuntos en las tablas `prompt_sets` y `prompt_lines`.
+`prompts.php` define los mensajes iniciales de ejemplo. Ejecuta `php prompts.php` para verlos por consola.
+`init_prompts.php` importa estos mensajes si las tablas `prompt_sets` y `prompt_lines` están vacías.
 
-Ejecuta `php init_prompts.php` una vez para pre-cargar los prompts y asignar el conjunto por defecto a los usuarios nuevos.
+Después de la carga inicial, los prompts pueden modificarse completamente desde `admin.php`, creando o editando conjuntos y mensajes individuales.
 
 Para acceder al panel de administración (`admin.php`) crea un usuario con la
 columna `es_admin` establecida en `1` dentro de la tabla `usuarios`.

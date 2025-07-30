@@ -1,6 +1,13 @@
 <?php
 // init_prompts.php - Load prompt sets defined in prompts.php into the database
 require 'db.php';
+
+$exists = $pdo->query('SELECT COUNT(*) FROM prompt_sets')->fetchColumn();
+if ($exists > 0) {
+    echo "Prompts ya inicializados.\n";
+    exit;
+}
+
 $promptSets = include 'prompts.php';
 
 $insertSet = $pdo->prepare('INSERT INTO prompt_sets (nombre) VALUES (?)');
