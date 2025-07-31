@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <!-- Header -->
         <div class="login-header">
             <h1 class="login-title">
-                <i class="fas fa-star star-icon"></i>
+              <i class="fa-solid fa-hat-wizard"></i>
                 MERLIN
             </h1>
             <p class="login-subtitle">Inicia sesión para acceder a tu chat de negocio privado</p>
@@ -182,14 +182,7 @@ function createParticle(x, y) {
         setTimeout(() => particle.remove(), 500);
     }, 100);
 }
-/* Floating particles */
-.particle {
-    position: absolute;
-    background: var(--primary-gold);
-    border-radius: 50%;
-    pointer-events: none;
-    animation: floatUp 3s ease-out infinite;
-}
+
 
 // Add enter key functionality
 document.querySelectorAll('.form-input').forEach(input => {
