@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔒 Política de Privacidad - Celestial Chat</title>
+    <title>🔒 Política de Privacidad - MERLIN</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
@@ -416,7 +416,7 @@
         <div class="header-content">
             <a href="chat.php" class="logo">
                 <i class="fas fa-star"></i>
-                Celestial Chat
+                MERLIN
             </a>
             <nav class="nav-links">
                 <a href="chat.php" class="nav-link">
@@ -441,7 +441,7 @@
         <section class="hero">
             <i class="fas fa-shield-alt hero-icon"></i>
             <h1>Tu Privacidad es Nuestra Prioridad</h1>
-            <p>En Celestial Chat, protegemos tu información personal con los más altos estándares de seguridad y transparencia.</p>
+            <p>En MERLIN, protegemos tu información personal con los más altos estándares de seguridad y transparencia.</p>
         </section>
 
         <!-- Privacy Grid -->
@@ -551,7 +551,7 @@
                 <a href="profile.php" class="footer-link">Mi Perfil</a>
                 <a href="privacy.php" class="footer-link">Privacidad</a>
             </div>
-            <p>&copy; 2025 Celestial Chat. Protegiendo tu privacidad con tecnología celestial.</p>
+            <p>&copy; 2025 MERLIN. Protegiendo tu privacidad con tecnología celestial.</p>
         </div>
     </footer>
 
