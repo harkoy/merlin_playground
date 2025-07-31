@@ -162,7 +162,7 @@ $mensajes = $stmt->fetchAll();
 <!-- Header -->
 <header class="header">
     <h1>
-        <i class="fas fa-star star-icon"></i>
+     <i class="fa-solid fa-hat-wizard"></i>
         MERLIN
     </h1>
     <div class="header-actions">
@@ -208,7 +208,7 @@ $mensajes = $stmt->fetchAll();
                         <?php if ($m['emisor'] === 'usuario'): ?>
                             <i class="fas fa-user"></i>
                         <?php else: ?>
-                            <i class="fas hat-wizard"></i>
+                            <i class="fa-solid fa-hat-wizard"></i>
                         <?php endif; ?>
                     </div>
                     <div class="message-content">
