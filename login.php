@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!-- Welcome Text -->
 <div class="welcome-text">
-    Bienvenido al Chat Celestial
+    Este es MERLIN
 </div>
 
 <!-- Login Container -->
@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="login-header">
             <h1 class="login-title">
                 <i class="fas fa-star star-icon"></i>
-                Celestial Chat
+                MERLIN
             </h1>
             <p class="login-subtitle">Inicia sesión para acceder a tu chat mágico</p>
         </div>
@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="login-footer">
             <div class="privacy-notice">
                 <p>
-                    Al usar este chat celestial aceptas nuestra 
+                    Al usar este chat aceptas nuestra 
                     <a href="privacy.php" class="privacy-link">
                         <i class="fas fa-shield-alt"></i>
                         Política de Privacidad
