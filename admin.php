@@ -31,40 +31,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$_POST['prompt_set_id'], $_POST['user_id']]);
     }
 
-    // prompt set operations
-    if (isset($_POST['add_set']) || isset($_POST['new_set_name'])) {
-        $stmt = $pdo->prepare('INSERT INTO prompt_sets (nombre) VALUES (?)');
-        $stmt->execute([$_POST['new_set_name']]);
-        $newId = $pdo->lastInsertId();
-        header('Location: admin.php?prompt_set=' . $newId . '&success=1');
-        exit;
-    }
-    if (isset($_POST['rename_set'])) {
-        $stmt = $pdo->prepare('UPDATE prompt_sets SET nombre = ? WHERE id = ?');
-        $stmt->execute([$_POST['set_name'], $_POST['set_id']]);
-    }
-
-    if (isset($_POST['add_line'])) {
-        $stmt = $pdo->prepare('INSERT INTO prompt_lines (set_id, role, content, orden) VALUES (?,?,?,?)');
-        $stmt->execute([$selectedSet, $_POST['line_role'], $_POST['line_content'], (int)$_POST['line_order']]);
-    }
-    if (isset($_POST['edit_line'])) {
-        $stmt = $pdo->prepare('UPDATE prompt_lines SET role = ?, content = ?, orden = ? WHERE id = ?');
-        $stmt->execute([$_POST['line_role'], $_POST['line_content'], (int)$_POST['line_order'], $_POST['line_id']]);
-    }
 }
 if (isset($_GET['del_question'])) {
     $stmt = $pdo->prepare('DELETE FROM preguntas_admin WHERE id = ?');
     $stmt->execute([$_GET['del_question']]);
-}
-if (isset($_GET['del_set'])) {
-    $stmt = $pdo->prepare('DELETE FROM prompt_sets WHERE id = ?');
-    $stmt->execute([$_GET['del_set']]);
-    $selectedSet = null;
-}
-if (isset($_GET['del_line']) && $selectedSet) {
-    $stmt = $pdo->prepare('DELETE FROM prompt_lines WHERE id = ? AND set_id = ?');
-    $stmt->execute([$_GET['del_line'], $selectedSet]);
 }
 
 $users = $pdo->query('SELECT id, nombre, apellido, email, telefono, es_admin, prompt_set_id FROM usuarios')->fetchAll();
@@ -91,7 +61,7 @@ if ($selectedSet) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⚡ Panel de Administración - Celestial Chat</title>
+<title>⚡ Panel de Administración - MERLIN</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/admin.css">
 </head>
@@ -251,15 +221,15 @@ if ($selectedSet) {
             </div>
             
             <!-- Add New Question -->
-            <form method="post" class="form-inline" style="margin-bottom: 1.5rem;">
+            <form id="add-question-form" class="form-inline" style="margin-bottom: 1.5rem;">
                 <input type="text" name="new_question" class="form-input" placeholder="Escribe una nueva pregunta..." required>
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Agregar
                 </button>
             </form>
-            
+
             <?php if (!empty($questions)): ?>
-                <table class="data-table">
+                <table id="questions-table" class="data-table">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -269,32 +239,37 @@ if ($selectedSet) {
                     </thead>
                     <tbody>
                         <?php foreach ($questions as $q): ?>
-                        <tr>
-                            <form method="post">
-                                <td><?php echo $q['id']; ?></td>
-                                <td>
-                                    <input type="hidden" name="edit_id" value="<?php echo $q['id']; ?>">
-                                    <input type="text" name="edit_text" value="<?php echo htmlspecialchars($q['texto_pregunta']); ?>" class="form-input">
-                                </td>
-                                <td>
-                                    <div style="display: flex; gap: 0.5rem;">
-                                        <button type="submit" class="btn btn-success">
-                                            <i class="fas fa-save"></i> Guardar
-                                        </button>
-                                        <a href="?del_question=<?php echo $q['id']; ?>" 
-                                           class="btn btn-danger" 
-                                           onclick="return confirm('¿Eliminar esta pregunta?')">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </form>
+                        <tr data-id="<?php echo $q['id']; ?>">
+                            <td><?php echo $q['id']; ?></td>
+                            <td>
+                                <input type="text" class="form-input question-text" value="<?php echo htmlspecialchars($q['texto_pregunta']); ?>">
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <button type="button" class="btn btn-success btn-save" data-id="<?php echo $q['id']; ?>">
+                                        <i class="fas fa-save"></i> Guardar
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-del" data-id="<?php echo $q['id']; ?>">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
             <?php else: ?>
-                <div class="empty-state">
+                <table id="questions-table" class="data-table" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Pregunta</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <div id="questions-empty" class="empty-state">
                     <i class="fas fa-question-circle"></i>
                     <h3>No hay preguntas configuradas</h3>
                     <p>Agrega preguntas para que aparezcan en el sistema.</p>
@@ -314,7 +289,7 @@ if ($selectedSet) {
             </div>
             
             <!-- Add New Set -->
-            <form method="post" class="form-inline" style="margin-bottom: 1.5rem;">
+            <form id="add-set-form" method="post" class="form-inline" style="margin-bottom: 1.5rem;">
                 <input type="text" name="new_set_name" class="form-input" placeholder="Nombre del nuevo conjunto..." required>
                 <button type="submit" name="add_set" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Crear Set
@@ -322,7 +297,7 @@ if ($selectedSet) {
             </form>
             
             <?php if (!empty($promptSets)): ?>
-                <table class="data-table">
+                <table id="sets-table" class="data-table">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -332,7 +307,7 @@ if ($selectedSet) {
                     </thead>
                     <tbody>
                         <?php foreach ($promptSets as $pset): ?>
-                        <tr>
+                        <tr data-id="<?php echo $pset['id']; ?>">
                             <form method="post" action="?prompt_set=<?php echo $pset['id']; ?>">
                                 <td><?php echo $pset['id']; ?></td>
                                 <td>
@@ -341,17 +316,15 @@ if ($selectedSet) {
                                 </td>
                                 <td>
                                     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                                        <button type="submit" name="rename_set" class="btn btn-success">
+                                        <button type="submit" name="rename_set" class="btn btn-success btn-save-set" data-id="<?php echo $pset['id']; ?>">
                                             <i class="fas fa-save"></i>
                                         </button>
                                         <a href="?prompt_set=<?php echo $pset['id']; ?>" class="btn">
                                             <i class="fas fa-eye"></i> Ver
                                         </a>
-                                        <a href="?del_set=<?php echo $pset['id']; ?>" 
-                                           class="btn btn-danger" 
-                                           onclick="return confirm('¿Eliminar este conjunto?')">
+                                        <button type="button" class="btn btn-danger btn-del-set" data-id="<?php echo $pset['id']; ?>">
                                             <i class="fas fa-trash"></i>
-                                        </a>
+                                        </button>
                                     </div>
                                 </td>
                             </form>
@@ -360,7 +333,7 @@ if ($selectedSet) {
                     </tbody>
                 </table>
             <?php else: ?>
-                <div class="empty-state">
+                <div id="sets-empty" class="empty-state">
                     <i class="fas fa-cogs"></i>
                     <h3>No hay conjuntos de prompts</h3>
                     <p>Crea conjuntos de prompts para configurar el comportamiento del chat.</p>
@@ -382,7 +355,7 @@ if ($selectedSet) {
             </div>
             
             <!-- Add New Line -->
-            <form method="post" action="?prompt_set=<?php echo $selectedSet; ?>" class="form-inline" style="margin-bottom: 1.5rem;">
+            <form id="add-line-form" method="post" data-set-id="<?php echo $selectedSet; ?>" action="?prompt_set=<?php echo $selectedSet; ?>" class="form-inline" style="margin-bottom: 1.5rem;">
                 <input type="number" name="line_order" value="<?php echo count($promptLines)+1; ?>" class="form-input" style="max-width: 80px;" min="1">
                 <select name="line_role" class="form-select" style="max-width: 120px;">
                     <option value="system">System</option>
@@ -396,7 +369,7 @@ if ($selectedSet) {
             </form>
             
             <?php if (!empty($promptLines)): ?>
-                <table class="data-table">
+                <table id="lines-table" class="data-table">
                     <thead>
                         <tr>
                             <th>Orden</th>
@@ -407,7 +380,7 @@ if ($selectedSet) {
                     </thead>
                     <tbody>
                         <?php foreach ($promptLines as $line): ?>
-                        <tr>
+                        <tr data-id="<?php echo $line['id']; ?>">
                             <form method="post" action="?prompt_set=<?php echo $selectedSet; ?>">
                                 <td>
                                     <input type="hidden" name="line_id" value="<?php echo $line['id']; ?>">
@@ -428,14 +401,12 @@ if ($selectedSet) {
                                 </td>
                                 <td>
                                     <div style="display: flex; gap: 0.5rem; flex-direction: column;">
-                                        <button type="submit" name="edit_line" class="btn btn-success">
+                                        <button type="submit" name="edit_line" class="btn btn-success btn-save-line" data-id="<?php echo $line['id']; ?>">
                                             <i class="fas fa-save"></i> Guardar
                                         </button>
-                                        <a href="?prompt_set=<?php echo $selectedSet; ?>&del_line=<?php echo $line['id']; ?>" 
-                                           class="btn btn-danger" 
-                                           onclick="return confirm('¿Eliminar este mensaje?')">
+                                        <button type="button" class="btn btn-danger btn-del-line" data-id="<?php echo $line['id']; ?>">
                                             <i class="fas fa-trash"></i>
-                                        </a>
+                                        </button>
                                     </div>
                                 </td>
                             </form>
@@ -444,7 +415,7 @@ if ($selectedSet) {
                     </tbody>
                 </table>
             <?php else: ?>
-                <div class="empty-state">
+                <div id="lines-empty" class="empty-state">
                     <i class="fas fa-list"></i>
                     <h3>No hay mensajes en este conjunto</h3>
                     <p>Agrega mensajes para configurar el comportamiento del chat.</p>
@@ -452,9 +423,11 @@ if ($selectedSet) {
             <?php endif; ?>
         </div>
         <?php endif; ?>
-    </div>
+</div>
 </div>
 
+<script src="assets/js/questions.js"></script>
+<script src="assets/js/prompts.js"></script>
 <script>
 // Tab functionality
 function showTab(tabName) {
