@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare('UPDATE preguntas_admin SET texto_pregunta = ? WHERE id = ?');
         $stmt->execute([$_POST['edit_text'], $_POST['edit_id']]);
     }
-    if (isset($_POST['prompt_update'])) {
+    if (isset($_POST['prompt_set_id'], $_POST['user_id'])) {
         $stmt = $pdo->prepare('UPDATE usuarios SET prompt_set_id = ? WHERE id = ?');
         $stmt->execute([$_POST['prompt_set_id'], $_POST['user_id']]);
     }
