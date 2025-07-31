@@ -10,6 +10,16 @@ if (!isset($_SESSION['usuario_id'])) {
 
 $usuario_id = $_SESSION['usuario_id'];
 
+// Cargar información del perfil del usuario
+$stmt = $pdo->prepare('SELECT nombre, apellido, empresa, email, telefono FROM usuarios WHERE id = ?');
+$stmt->execute([$usuario_id]);
+$usuarioDatos = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Obtener respuestas previas del usuario a preguntas administradas
+$respStmt = $pdo->prepare('SELECT pa.texto_pregunta, r.respuesta FROM respuestas r JOIN preguntas_admin pa ON r.pregunta_id = pa.id WHERE r.usuario_id = ?');
+$respStmt->execute([$usuario_id]);
+$respuestasUsuario = $respStmt->fetchAll(PDO::FETCH_ASSOC);
+
 // Obtener preferencias de diseño o crear valores por defecto
 $stmt = $pdo->prepare("SELECT tema, color_preferido FROM preferencias_disenio WHERE usuario_id = ? LIMIT 1");
 $stmt->execute([$usuario_id]);
@@ -38,6 +48,28 @@ if (!$conver) {
     $conver_id = $pdo->lastInsertId();
 } else {
     $conver_id = $conver['id'];
+}
+
+// Insertar mensaje de bienvenida si la conversación está vacía
+$stmt = $pdo->prepare('SELECT COUNT(*) FROM mensajes WHERE conversacion_id = ?');
+$stmt->execute([$conver_id]);
+if ($stmt->fetchColumn() == 0) {
+    $tplStmt = $pdo->prepare("SELECT contenido FROM mensajes_sistema WHERE clave = 'bienvenida' LIMIT 1");
+    $tplStmt->execute();
+    $plantilla = $tplStmt->fetchColumn();
+    if (!$plantilla) {
+        $plantilla = 'Hola {nombre}{empresa_parte} En vez de enviarte un formulario duro para que completes y sepamos más de tu negocio, tus preferencias, ambiciones y necesidades, lo haremos a través de una conversación. Voy a hacerte preguntas de forma natural para que podamos conversar. Es posible que algunas charlas no tengan mucho sentido para vos, pero te aseguro que para mí sí lo tendrán y, si conversás conmigo de manera sincera y fluida, el resultado será más rápido y mejor de lo que esperás.';
+    }
+    $empresaParte = !empty($usuarioDatos['empresa'])
+        ? ', ¡qué gusto verte! ¿Cómo van las cosas en ' . $usuarioDatos['empresa'] . '?'
+        : ', gracias por estar acá.';
+    $mensajeBienvenida = str_replace(
+        ['{nombre}', '{empresa_parte}'],
+        [$usuarioDatos['nombre'], $empresaParte],
+        $plantilla
+    );
+    $insert = $pdo->prepare("INSERT INTO mensajes (conversacion_id, emisor, texto) VALUES (?, 'asistente', ?)");
+    $insert->execute([$conver_id, $mensajeBienvenida]);
 }
 
 // Borrar mensaje si el usuario lo solicita
@@ -118,7 +150,7 @@ if (isset($_POST['mensaje']) && trim($_POST['mensaje']) !== '') {
         $messages[] = ['role' => $m['emisor'] === 'usuario' ? 'user' : 'assistant', 'content' => $m['texto']];
     }
 
-    // Prompt inicial y preguntas base si es el primer mensaje
+    $basePrompts = [];
     if (count($messages) === 1) {
         $setStmt = $pdo->prepare('SELECT prompt_set_id FROM usuarios WHERE id = ?');
         $setStmt->execute([$usuario_id]);
@@ -126,13 +158,24 @@ if (isset($_POST['mensaje']) && trim($_POST['mensaje']) !== '') {
         if ($setId) {
             $pstmt = $pdo->prepare('SELECT role, content FROM prompt_lines WHERE set_id = ? ORDER BY orden');
             $pstmt->execute([$setId]);
-            $basePrompts = [];
             foreach ($pstmt->fetchAll() as $p) {
                 $basePrompts[] = ['role' => $p['role'], 'content' => $p['content']];
             }
-            $messages = array_merge($basePrompts, $messages);
         }
     }
+
+    $contextoUsuario = 'Perfil del usuario: Nombre: ' . $usuarioDatos['nombre'] . ' ' . $usuarioDatos['apellido'] . '. Email: ' . $usuarioDatos['email'] . '.';
+    if (!empty($usuarioDatos['telefono'])) {
+        $contextoUsuario .= ' Teléfono: ' . $usuarioDatos['telefono'] . '.';
+    }
+    if (!empty($usuarioDatos['empresa'])) {
+        $contextoUsuario .= ' Empresa: ' . $usuarioDatos['empresa'] . '.';
+    }
+    foreach ($respuestasUsuario as $r) {
+        $contextoUsuario .= ' ' . $r['texto_pregunta'] . ': ' . $r['respuesta'] . '.';
+    }
+
+    $messages = array_merge($basePrompts, [['role' => 'system', 'content' => $contextoUsuario]], $messages);
 
     $respuesta = call_openai_api($messages);
 

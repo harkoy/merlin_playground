@@ -5,6 +5,16 @@ CREATE DATABASE IF NOT EXISTS marhar345_merlin
   CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE marhar345_merlin;
 
+-- System messages
+CREATE TABLE IF NOT EXISTS mensajes_sistema (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    clave VARCHAR(50) UNIQUE NOT NULL,
+    contenido TEXT NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO mensajes_sistema (clave, contenido) VALUES
+('bienvenida', 'Hola {nombre}{empresa_parte} En vez de enviarte un formulario duro para que completes y sepamos más de tu negocio, tus preferencias, ambiciones y necesidades, lo haremos a través de una conversación. Voy a hacerte preguntas de forma natural para que podamos conversar. Es posible que algunas charlas no tengan mucho sentido para vos, pero te aseguro que para mí sí lo tendrán y, si conversás conmigo de manera sincera y fluida, el resultado será más rápido y mejor de lo que esperás.');
+
 -- Prompt sets to allow different base instructions
 CREATE TABLE IF NOT EXISTS prompt_sets (
     id INT AUTO_INCREMENT PRIMARY KEY,
