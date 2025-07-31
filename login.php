@@ -182,6 +182,14 @@ function createParticle(x, y) {
         setTimeout(() => particle.remove(), 500);
     }, 100);
 }
+/* Floating particles */
+.particle {
+    position: absolute;
+    background: var(--primary-gold);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: floatUp 3s ease-out infinite;
+}
 
 // Add enter key functionality
 document.querySelectorAll('.form-input').forEach(input => {
