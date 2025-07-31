@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>✨ Mi Perfil Celestial</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/profile.css">
+<link rel="stylesheet" href="assets/css/app.css">
 </head>
 <body>
 
@@ -245,7 +245,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
 </div>
 
 <!-- Hidden delete form -->
-<form method="post" id="deleteForm" style="display: none;">
+<form method="post" id="deleteForm" class="hidden">
     <input type="hidden" name="delete" value="1">
 </form>
 

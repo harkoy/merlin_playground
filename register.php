@@ -28,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <title>Registro</title>
+<link rel="stylesheet" href="assets/css/app.css">
 </head>
 <body>
 <h1>Registro</h1>
@@ -40,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <input name="password" type="password" placeholder="Contraseña" required><br>
     <button type="submit">Registrar</button>
 </form>
-<p style="font-size:small">Al registrarte aceptas la <a href="privacy.php">política de privacidad</a> y que tus datos sean almacenados.</p>
+<p class="small-note">Al registrarte aceptas la <a href="privacy.php">política de privacidad</a> y que tus datos sean almacenados.</p>
 <?php if (!empty($error)) echo "<p>$error</p>"; ?>
 </body>
 </html>

@@ -93,7 +93,7 @@ if ($selectedSet) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>⚡ Panel de Administración - Celestial Chat</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/admin.css">
+<link rel="stylesheet" href="assets/css/app.css">
 </head>
 <body>
 
@@ -199,7 +199,7 @@ if ($selectedSet) {
                                         <i class="fas fa-crown"></i> Admin
                                     </span>
                                 <?php else: ?>
-                                    <span class="user-badge" style="background: rgba(52, 73, 94, 0.3); color: var(--text-muted);">
+                                    <span class="user-badge badge-muted">
                                         <i class="fas fa-user"></i> Usuario
                                     </span>
                                 <?php endif; ?>
@@ -251,7 +251,7 @@ if ($selectedSet) {
             </div>
             
             <!-- Add New Question -->
-            <form method="post" class="form-inline" style="margin-bottom: 1.5rem;">
+            <form method="post" class="form-inline mb-1-5">
                 <input type="text" name="new_question" class="form-input" placeholder="Escribe una nueva pregunta..." required>
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Agregar
@@ -277,7 +277,7 @@ if ($selectedSet) {
                                     <input type="text" name="edit_text" value="<?php echo htmlspecialchars($q['texto_pregunta']); ?>" class="form-input">
                                 </td>
                                 <td>
-                                    <div style="display: flex; gap: 0.5rem;">
+                                      <div class="flex-gap">
                                         <button type="submit" class="btn btn-success">
                                             <i class="fas fa-save"></i> Guardar
                                         </button>
@@ -314,7 +314,7 @@ if ($selectedSet) {
             </div>
             
             <!-- Add New Set -->
-            <form method="post" class="form-inline" style="margin-bottom: 1.5rem;">
+            <form method="post" class="form-inline mb-1-5">
                 <input type="text" name="new_set_name" class="form-input" placeholder="Nombre del nuevo conjunto..." required>
                 <button type="submit" name="add_set" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Crear Set
@@ -340,7 +340,7 @@ if ($selectedSet) {
                                     <input type="text" name="set_name" value="<?php echo htmlspecialchars($pset['nombre']); ?>" class="form-input">
                                 </td>
                                 <td>
-                                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                    <div class="flex-gap-wrap">
                                         <button type="submit" name="rename_set" class="btn btn-success">
                                             <i class="fas fa-save"></i>
                                         </button>
@@ -382,9 +382,9 @@ if ($selectedSet) {
             </div>
             
             <!-- Add New Line -->
-            <form method="post" action="?prompt_set=<?php echo $selectedSet; ?>" class="form-inline" style="margin-bottom: 1.5rem;">
-                <input type="number" name="line_order" value="<?php echo count($promptLines)+1; ?>" class="form-input" style="max-width: 80px;" min="1">
-                <select name="line_role" class="form-select" style="max-width: 120px;">
+            <form method="post" action="?prompt_set=<?php echo $selectedSet; ?>" class="form-inline mb-1-5">
+                <input type="number" name="line_order" value="<?php echo count($promptLines)+1; ?>" class="form-input mw-80" min="1">
+                <select name="line_role" class="form-select mw-120">
                     <option value="system">System</option>
                     <option value="assistant">Assistant</option>
                     <option value="user">User</option>
@@ -411,7 +411,7 @@ if ($selectedSet) {
                             <form method="post" action="?prompt_set=<?php echo $selectedSet; ?>">
                                 <td>
                                     <input type="hidden" name="line_id" value="<?php echo $line['id']; ?>">
-                                    <input type="number" name="line_order" value="<?php echo $line['orden']; ?>" class="form-input" style="max-width: 60px;" min="1">
+                                      <input type="number" name="line_order" value="<?php echo $line['orden']; ?>" class="form-input mw-60" min="1">
                                 </td>
                                 <td>
                                     <select name="line_role" class="form-select">
@@ -419,7 +419,7 @@ if ($selectedSet) {
                                         <option value="assistant" <?php if($line['role']=='assistant') echo 'selected'; ?>>Assistant</option>
                                         <option value="user" <?php if($line['role']=='user') echo 'selected'; ?>>User</option>
                                     </select>
-                                    <span class="role-tag role-<?php echo $line['role']; ?>" style="margin-left: 0.5rem;">
+                                      <span class="role-tag role-<?php echo $line['role']; ?> ml-0-5">
                                         <?php echo ucfirst($line['role']); ?>
                                     </span>
                                 </td>
@@ -427,7 +427,7 @@ if ($selectedSet) {
                                     <textarea name="line_content" rows="3" class="form-textarea"><?php echo htmlspecialchars($line['content']); ?></textarea>
                                 </td>
                                 <td>
-                                    <div style="display: flex; gap: 0.5rem; flex-direction: column;">
+                                      <div class="flex-gap-col">
                                         <button type="submit" name="edit_line" class="btn btn-success">
                                             <i class="fas fa-save"></i> Guardar
                                         </button>
