@@ -36,9 +36,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="stars" id="stars"></div>
 
 <!-- Welcome Text -->
-<div class="welcome-text">
-    Este es MERLIN
-</div>
 
 <!-- Login Container -->
 <div class="login-container">
@@ -49,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <i class="fas fa-star star-icon"></i>
                 MERLIN
             </h1>
-            <p class="login-subtitle">Inicia sesión para acceder a tu chat privado</p>
+            <p class="login-subtitle">Inicia sesión para acceder a tu chat de negocio privado</p>
         </div>
 
         <!-- Login Form -->
