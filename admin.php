@@ -44,13 +44,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$_POST['set_name'], $_POST['set_id']]);
     }
 
-    if (isset($_POST['add_line'])) {
+    if (isset($_POST['line_content']) && !isset($_POST['line_id'])) {
+        $setId = isset($_POST['set_id']) ? (int)$_POST['set_id'] : $selectedSet;
         $stmt = $pdo->prepare('INSERT INTO prompt_lines (set_id, role, content, orden) VALUES (?,?,?,?)');
-        $stmt->execute([$selectedSet, $_POST['line_role'], $_POST['line_content'], (int)$_POST['line_order']]);
+        $stmt->execute([
+            $setId,
+            $_POST['line_role'],
+            $_POST['line_content'],
+            (int)$_POST['line_order']
+        ]);
     }
-    if (isset($_POST['edit_line'])) {
-        $stmt = $pdo->prepare('UPDATE prompt_lines SET role = ?, content = ?, orden = ? WHERE id = ?');
-        $stmt->execute([$_POST['line_role'], $_POST['line_content'], (int)$_POST['line_order'], $_POST['line_id']]);
+    if (isset($_POST['line_id']) && isset($_POST['line_content'])) {
+        $setId = isset($_POST['set_id']) ? (int)$_POST['set_id'] : $selectedSet;
+        $stmt = $pdo->prepare('UPDATE prompt_lines SET role = ?, content = ?, orden = ? WHERE id = ? AND set_id = ?');
+        $stmt->execute([
+            $_POST['line_role'],
+            $_POST['line_content'],
+            (int)$_POST['line_order'],
+            $_POST['line_id'],
+            $setId
+        ]);
     }
 }
 if (isset($_GET['del_question'])) {
@@ -383,6 +396,7 @@ if ($selectedSet) {
             
             <!-- Add New Line -->
             <form method="post" action="?prompt_set=<?php echo $selectedSet; ?>" class="form-inline" style="margin-bottom: 1.5rem;">
+                <input type="hidden" name="set_id" value="<?php echo $selectedSet; ?>">
                 <input type="number" name="line_order" value="<?php echo count($promptLines)+1; ?>" class="form-input" style="max-width: 80px;" min="1">
                 <select name="line_role" class="form-select" style="max-width: 120px;">
                     <option value="system">System</option>
@@ -410,6 +424,7 @@ if ($selectedSet) {
                         <tr>
                             <form method="post" action="?prompt_set=<?php echo $selectedSet; ?>">
                                 <td>
+                                    <input type="hidden" name="set_id" value="<?php echo $selectedSet; ?>">
                                     <input type="hidden" name="line_id" value="<?php echo $line['id']; ?>">
                                     <input type="number" name="line_order" value="<?php echo $line['orden']; ?>" class="form-input" style="max-width: 60px;" min="1">
                                 </td>
