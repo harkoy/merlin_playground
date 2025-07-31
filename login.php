@@ -35,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!-- Animated Stars Background -->
 <div class="stars" id="stars"></div>
 
+
 <!-- Welcome Text -->
 
 <!-- Login Container -->
@@ -116,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Create animated stars
 function createStars() {
     const starsContainer = document.getElementById('stars');
-    const numStars = 50;
+    const numStars = 60;
     
     for (let i = 0; i < numStars; i++) {
         const star = document.createElement('div');
