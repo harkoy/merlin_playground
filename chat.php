@@ -208,7 +208,7 @@ $mensajes = $stmt->fetchAll();
                         <?php if ($m['emisor'] === 'usuario'): ?>
                             <i class="fas fa-user"></i>
                         <?php else: ?>
-                            <i class="fas fa-magic"></i>
+                            <i class="fas hat-witch"></i>
                         <?php endif; ?>
                     </div>
                     <div class="message-content">
