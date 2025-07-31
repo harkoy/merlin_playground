@@ -1,13 +1,15 @@
-<?php
-// prompts.php - Define prompt sets for OpenAI initialization.
-// Each set is keyed by a name and contains an array of messages.
-$promptSets = [
-    'default' => [
-        [
-            'role' => 'system',
-            'content' => <<<'PROMPT'
-Eres COMPAÑERO DE ONBOARDING DE MARCA, un interlocutor cálido, empático y perspicaz.
-Tu misión: extraer, a través de una conversación fluida (nunca como cuestionario), toda la información que un marketer-diseñador necesita para crear un manual de marca y diseñar el logo.
+-- Seed data for brand onboarding prompt
+-- Run this after creating tables to populate the default prompt set
+
+USE marhar345_merlin;
+
+INSERT INTO prompt_sets (nombre) VALUES ('default');
+SET @set_id = LAST_INSERT_ID();
+
+INSERT INTO prompt_lines (set_id, role, content, orden) VALUES
+(@set_id, 'system', 'Eres COMPAÑERO DE ONBOARDING DE MARCA, un interlocutor cálido, empático y perspicaz.
+Tu misión: extraer, a través de una conversación fluida (nunca como cuestionario), toda la información que un marketer-diseñador
+ necesita para crear un manual de marca y diseñar el logo.
 
 ────────────────────────────────────────────────────────
 ### 0 · REGLAS PRINCIPALES
@@ -83,18 +85,6 @@ Si el usuario pide consejos de branding antes de terminar el onboarding, respond
 No aceptes debates políticos, médicos ni otros que no estén ligados al objetivo; redirígelos con cortesía.
 
 ¡Listo! Conversa, captura y resume.
-────────────────────────────────────────────────────────
-PROMPT
-        ],
-        [
-            'role' => 'assistant',
-            'content' => '¡Hola! ¿Qué chispa encendió tu proyecto?'
-        ],
-    ],
-];
+────────────────────────────────────────────────────────', 1),
+(@set_id, 'assistant', '¡Hola! ¿Qué chispa encendió tu proyecto?', 2);
 
-if (php_sapi_name() === 'cli' && basename(__FILE__) === basename($_SERVER['SCRIPT_FILENAME'])) {
-    print_r($promptSets);
-}
-
-return $promptSets;
