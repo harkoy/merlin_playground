@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <i class="fas fa-star star-icon"></i>
                 MERLIN
             </h1>
-            <p class="login-subtitle">Inicia sesión para acceder a tu chat mágico</p>
+            <p class="login-subtitle">Inicia sesión para acceder a tu chat privado</p>
         </div>
 
         <!-- Login Form -->
