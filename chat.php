@@ -118,19 +118,30 @@ if (isset($_POST['mensaje']) && trim($_POST['mensaje']) !== '') {
         $messages[] = ['role' => $m['emisor'] === 'usuario' ? 'user' : 'assistant', 'content' => $m['texto']];
     }
 
-    // Prompt inicial y preguntas base si es el primer mensaje
-    if (count($messages) === 1) {
-        $setStmt = $pdo->prepare('SELECT prompt_set_id FROM usuarios WHERE id = ?');
-        $setStmt->execute([$usuario_id]);
-        $setId = $setStmt->fetchColumn();
-        if ($setId) {
-            $pstmt = $pdo->prepare('SELECT role, content FROM prompt_lines WHERE set_id = ? ORDER BY orden');
-            $pstmt->execute([$setId]);
-            $basePrompts = [];
-            foreach ($pstmt->fetchAll() as $p) {
-                $basePrompts[] = ['role' => $p['role'], 'content' => $p['content']];
+    // Añadir instrucciones del sistema y prompts iniciales
+    $setStmt = $pdo->prepare('SELECT prompt_set_id FROM usuarios WHERE id = ?');
+    $setStmt->execute([$usuario_id]);
+    $setId = $setStmt->fetchColumn();
+    if ($setId) {
+        $pstmt = $pdo->prepare('SELECT role, content FROM prompt_lines WHERE set_id = ? ORDER BY orden');
+        $pstmt->execute([$setId]);
+        $systemPrompts = [];
+        $otherPrompts = [];
+        foreach ($pstmt->fetchAll() as $p) {
+            $prompt = ['role' => $p['role'], 'content' => $p['content']];
+            if ($p['role'] === 'system') {
+                $systemPrompts[] = $prompt;
+            } else {
+                $otherPrompts[] = $prompt;
             }
-            $messages = array_merge($basePrompts, $messages);
+        }
+
+        if (count($historial) === 1) {
+            // Primer mensaje del usuario: incluir todos los prompts base
+            $messages = array_merge($systemPrompts, $otherPrompts, $messages);
+        } else {
+            // Conversaciones existentes: sólo instrucciones del sistema
+            $messages = array_merge($systemPrompts, $messages);
         }
     }
 
