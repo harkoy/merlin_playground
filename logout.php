@@ -431,14 +431,14 @@ function updateCountdown() {
 }
 
 // Create floating particles
-function createParticle() {
+function createParticle(x, y) {
     const particle = document.createElement('div');
     particle.className = 'particle';
-    particle.style.left = Math.random() * 100 + '%';
-    particle.style.bottom = '0';
-    particle.style.width = Math.random() * 4 + 2 + 'px';
-    particle.style.height = particle.style.width;
-    particle.style.animationDelay = Math.random() * 2 + 's';
+    particle.style.left = x + 'px';
+    particle.style.top = y + 'px';
+    particle.style.width = '4px';
+    particle.style.height = '4px';
+    particle.style.opacity = '0.8';
     document.body.appendChild(particle);
     
     // Remove particle after animation

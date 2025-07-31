@@ -174,14 +174,18 @@ function createParticle(x, y) {
     particle.style.opacity = '0.8';
     document.body.appendChild(particle);
     
-    // Animate and remove particle
-    setTimeout(() => {
-        particle.style.opacity = '0';
-        particle.style.transform = 'translateY(-20px) scale(0)';
-        particle.style.transition = 'all 0.5s ease-out';
-        setTimeout(() => particle.remove(), 500);
-    }, 100);
+     // Remove particle after animation
+    setTimeout(() => particle.remove(), 3000);
 }
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    createStars();
+    updateCountdown();
+    
+    // Create particles periodically
+    setInterval(createParticle, 500);
+});
 
 
 // Add enter key functionality
