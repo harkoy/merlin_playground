@@ -1,24 +1,4 @@
-:root {
-    --primary-gold: #D4AF37;
-    --secondary-gold: #FFD700;
-    --deep-blue: #0B1426;
-    --navy-blue: #1A2332;
-    --light-blue: #2C3E50;
-    --accent-blue: #34495E;
-    --text-light: #ECF0F1;
-    --text-muted: #BDC3C7;
-    --shadow-gold: rgba(212, 175, 55, 0.3);
-    --gradient-bg: linear-gradient(135deg, #0B1426 0%, #1A2332 50%, #2C3E50 100%);
-    --error-red: #E74C3C;
-    --success-green: #27AE60;
-    --warning-orange: #F39C12;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+@import url('app.css');
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -123,6 +103,14 @@ body {
     padding: 0 2rem;
     position: relative;
     z-index: 10;
+}
+
+@media (max-width: 1200px) {
+    .main-container { max-width: 90%; }
+}
+
+@media (max-width: 1024px) {
+    .main-container { max-width: 95%; padding: 0 1.5rem; }
 }
 
 /* Profile Card */
@@ -430,8 +418,16 @@ body {
     .modal {
         padding: 1.5rem;
     }
-    
+
     .modal-buttons {
         flex-direction: column;
     }
+}
+
+@media (max-width: 480px) {
+    .profile-card { padding: 1rem; }
+}
+
+@media (max-width: 320px) {
+    .profile-card { padding: 0.5rem; }
 }

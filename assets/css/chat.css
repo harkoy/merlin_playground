@@ -1,22 +1,13 @@
+@import url('app.css');
+
 :root {
-    --primary-gold: var(--user-color);
-    --secondary-gold: var(--user-color);
-    --deep-blue: #0B1426;
-    --navy-blue: #1A2332;
-    --light-blue: #2C3E50;
-    --accent-blue: #34495E;
+    --primary-gold: var(--user-color, #D4AF37);
+    --secondary-gold: var(--user-color, #D4AF37);
     --text-light: #FFFFFF;
     --text-muted: #A0A6B0;
-    --shadow-gold: rgba(212, 175, 55, 0.3);
     --gradient-bg: linear-gradient(135deg, #0B1426 0%, #1A2332 100%);
     --message-bg-assistant: rgba(52, 73, 94, 0.95);
     --message-bg-user: rgba(212, 175, 55, 0.95);
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
 }
 
 body {
@@ -173,7 +164,20 @@ body.light .settings-row select {
     padding: 2rem;
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 120px);
+    height: calc(100dvh - 120px);
+}
+
+@media (max-width: 1200px) {
+    .chat-container { padding: 1.5rem; }
+}
+@media (max-width: 1024px) {
+    .chat-container { padding: 1rem; }
+}
+@media (max-width: 768px) {
+    .chat-container { padding: 0.5rem; }
+}
+@media (max-width: 480px) {
+    .chat-container { padding: 0.25rem; }
 }
 
 .chat-window {

@@ -150,13 +150,13 @@ if ($selectedSet) {
 
     <!-- Tab Navigation -->
     <div class="tab-navigation">
-        <button class="tab-btn active" onclick="showTab('users')">
+        <button class="tab-btn active" data-tab="users">
             <i class="fas fa-users"></i> Usuarios
         </button>
-        <button class="tab-btn" onclick="showTab('questions')">
+        <button class="tab-btn" data-tab="questions">
             <i class="fas fa-question-circle"></i> Preguntas
         </button>
-        <button class="tab-btn" onclick="showTab('prompts')">
+        <button class="tab-btn" data-tab="prompts">
             <i class="fas fa-cogs"></i> Prompts
         </button>
     </div>
@@ -172,6 +172,7 @@ if ($selectedSet) {
             </div>
             
             <?php if (!empty($users)): ?>
+                <div class="data-table-wrapper">
                 <table class="data-table">
                     <thead>
                         <tr>
@@ -230,6 +231,7 @@ if ($selectedSet) {
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+                </div>
             <?php else: ?>
                 <div class="empty-state">
                     <i class="fas fa-users"></i>
@@ -259,6 +261,7 @@ if ($selectedSet) {
             </form>
             
             <?php if (!empty($questions)): ?>
+                <div class="data-table-wrapper">
                 <table class="data-table">
                     <thead>
                         <tr>
@@ -293,6 +296,7 @@ if ($selectedSet) {
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+                </div>
             <?php else: ?>
                 <div class="empty-state">
                     <i class="fas fa-question-circle"></i>
@@ -322,6 +326,7 @@ if ($selectedSet) {
             </form>
             
             <?php if (!empty($promptSets)): ?>
+                <div class="data-table-wrapper">
                 <table class="data-table">
                     <thead>
                         <tr>
@@ -359,6 +364,7 @@ if ($selectedSet) {
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+                </div>
             <?php else: ?>
                 <div class="empty-state">
                     <i class="fas fa-cogs"></i>
@@ -396,6 +402,7 @@ if ($selectedSet) {
             </form>
             
             <?php if (!empty($promptLines)): ?>
+                <div class="data-table-wrapper">
                 <table class="data-table">
                     <thead>
                         <tr>
@@ -443,6 +450,7 @@ if ($selectedSet) {
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+                </div>
             <?php else: ?>
                 <div class="empty-state">
                     <i class="fas fa-list"></i>
@@ -456,27 +464,30 @@ if ($selectedSet) {
 </div>
 
 <script>
-// Tab functionality
-function showTab(tabName) {
-    // Hide all tab contents
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active');
-    });
-    
-    // Remove active class from all tab buttons
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    // Show selected tab content
-    document.getElementById(tabName + '-tab').classList.add('active');
-    
-    // Add active class to clicked button
-    event.target.classList.add('active');
+// Debounce helper
+function debounce(fn, delay = 100) {
+    let timeout;
+    return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => fn.apply(this, args), delay);
+    };
 }
 
-// Auto-save functionality for forms
-document.addEventListener('DOMContentLoaded', function() {
+// Tab functionality
+function showTab(tabName) {
+    const target = document.getElementById(tabName + '-tab');
+    if (!target) return;
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    target.classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tabName));
+}
+
+function initAdmin() {
+    // Tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => showTab(btn.dataset.tab));
+    });
+
     // Add loading states to forms
     document.querySelectorAll('form').forEach(form => {
         form.addEventListener('submit', function() {
@@ -485,8 +496,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const originalText = submitBtn.innerHTML;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
                 submitBtn.disabled = true;
-                
-                // Re-enable after 3 seconds if still on page
                 setTimeout(() => {
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
@@ -494,23 +503,21 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
+
     // Auto-resize textareas
     document.querySelectorAll('textarea').forEach(textarea => {
-        textarea.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = this.scrollHeight + 'px';
-        });
-        
-        // Initial resize
-        textarea.style.height = textarea.scrollHeight + 'px';
+        const resize = () => {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        };
+        textarea.addEventListener('input', resize);
+        resize();
     });
-    
+
     // Confirm deletion dialogs with more context
     document.querySelectorAll('a[onclick*="confirm"]').forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
-            
             let message = 'Esta acción no se puede deshacer.';
             if (this.href.includes('delete_user')) {
                 message = '¿Estás seguro de eliminar este usuario?\n\nSe eliminarán todos sus datos y conversaciones.';
@@ -521,16 +528,14 @@ document.addEventListener('DOMContentLoaded', function() {
             } else if (this.href.includes('del_line')) {
                 message = '¿Estás seguro de eliminar este mensaje?\n\nEsto puede afectar el comportamiento del chat.';
             }
-            
             if (confirm(message)) {
-                // Show loading state
                 this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
                 this.style.pointerEvents = 'none';
                 window.location.href = this.href;
             }
         });
     });
-    
+
     // Success/Error notifications
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('success')) {
@@ -539,27 +544,24 @@ document.addEventListener('DOMContentLoaded', function() {
     if (urlParams.has('error')) {
         showNotification('Ocurrió un error al procesar la solicitud', 'error');
     }
-    
+
     // Auto-focus on inputs when tabs change
     document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', () => {
             setTimeout(() => {
                 const activeTab = document.querySelector('.tab-content.active');
-                const firstInput = activeTab.querySelector('input[type="text"], textarea');
-                if (firstInput) {
-                    firstInput.focus();
-                }
+                const firstInput = activeTab ? activeTab.querySelector('input[type="text"], textarea') : null;
+                if (firstInput) firstInput.focus();
             }, 100);
         });
     });
-    
+
     // Enhanced form validation
     document.querySelectorAll('input[required], textarea[required]').forEach(field => {
         field.addEventListener('invalid', function() {
             this.style.borderColor = 'var(--error-red)';
             this.style.boxShadow = '0 0 10px rgba(231, 76, 60, 0.3)';
         });
-        
         field.addEventListener('input', function() {
             if (this.validity.valid) {
                 this.style.borderColor = 'var(--success-green)';
@@ -567,122 +569,35 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
+
     // Smart table sorting
     document.querySelectorAll('.data-table th').forEach(header => {
         header.style.cursor = 'pointer';
-        header.addEventListener('click', function() {
-            sortTable(this);
-        });
+        header.addEventListener('click', () => sortTable(header));
     });
-});
 
-// Notification system
-function showNotification(message, type = 'success') {
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
-        ${message}
-    `;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.style.opacity = '0';
-        notification.style.transform = 'translateX(100%)';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
-}
-
-// Table sorting function
-function sortTable(header) {
-    const table = header.closest('table');
-    const tbody = table.querySelector('tbody');
-    const rows = Array.from(tbody.querySelectorAll('tr'));
-    const columnIndex = Array.from(header.parentNode.children).indexOf(header);
-    
-    // Determine sort direction
-    const isAscending = !header.classList.contains('sort-asc');
-    
-    // Clear previous sort indicators
-    header.parentNode.querySelectorAll('th').forEach(th => {
-        th.classList.remove('sort-asc', 'sort-desc');
-    });
-    
-    // Add sort indicator
-    header.classList.add(isAscending ? 'sort-asc' : 'sort-desc');
-    
-    // Sort rows
-    rows.sort((a, b) => {
-        const aText = a.children[columnIndex].textContent.trim();
-        const bText = b.children[columnIndex].textContent.trim();
-        
-        // Check if values are numbers
-        const aNum = parseFloat(aText);
-        const bNum = parseFloat(bText);
-        
-        if (!isNaN(aNum) && !isNaN(bNum)) {
-            return isAscending ? aNum - bNum : bNum - aNum;
-        }
-        
-        // String comparison
-        return isAscending ? aText.localeCompare(bText) : bText.localeCompare(aText);
-    });
-    
-    // Re-append sorted rows
-    rows.forEach(row => tbody.appendChild(row));
-}
-
-// Keyboard shortcuts
-document.addEventListener('keydown', function(e) {
-    // Ctrl/Cmd + S to save current form
-    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-        e.preventDefault();
-        const activeTab = document.querySelector('.tab-content.active');
-        const form = activeTab.querySelector('form');
-        if (form) {
-            form.submit();
-        }
-    }
-    
-    // Escape to close modals or reset forms
-    if (e.key === 'Escape') {
-        document.querySelectorAll('input[type="text"], textarea').forEach(field => {
-            if (document.activeElement === field) {
-                field.blur();
+    // Auto-save drafts (check localStorage)
+    if (typeof Storage !== 'undefined') {
+        document.querySelectorAll('textarea').forEach(textarea => {
+            const key = `draft_${textarea.name}_${window.location.pathname}`;
+            const savedDraft = localStorage.getItem(key);
+            if (savedDraft && !textarea.value.trim()) {
+                textarea.value = savedDraft;
+                textarea.style.borderColor = 'var(--warning-orange)';
+                textarea.title = 'Borrador guardado automáticamente';
+            }
+            textarea.addEventListener('input', function() {
+                localStorage.setItem(key, this.value);
+                this.style.borderColor = 'var(--warning-orange)';
+                this.title = 'Borrador guardado automáticamente';
+            });
+            const form = textarea.closest('form');
+            if (form) {
+                form.addEventListener('submit', () => localStorage.removeItem(key));
             }
         });
     }
-});
 
-// Auto-save drafts for textareas (simple localStorage implementation)
-document.querySelectorAll('textarea').forEach(textarea => {
-    const key = `draft_${textarea.name}_${window.location.pathname}`;
-    
-    // Load saved draft
-    const savedDraft = localStorage.getItem(key);
-    if (savedDraft && !textarea.value.trim()) {
-        textarea.value = savedDraft;
-        textarea.style.borderColor = 'var(--warning-orange)';
-        textarea.title = 'Borrador guardado automáticamente';
-    }
-    
-    // Save draft on input
-    textarea.addEventListener('input', function() {
-        localStorage.setItem(key, this.value);
-        this.style.borderColor = 'var(--warning-orange)';
-        this.title = 'Borrador guardado automáticamente';
-    });
-    
-    // Clear draft on successful submit
-    textarea.closest('form').addEventListener('submit', function() {
-        localStorage.removeItem(key);
-    });
-});
-
-// Enhanced user experience features
-document.addEventListener('DOMContentLoaded', function() {
     // Add tooltips to action buttons
     document.querySelectorAll('.btn').forEach(btn => {
         if (!btn.title && btn.querySelector('i')) {
@@ -694,7 +609,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (icon.includes('fa-arrow-left')) btn.title = 'Volver';
         }
     });
-    
+
     // Highlight unsaved changes
     document.querySelectorAll('input, textarea, select').forEach(field => {
         const originalValue = field.value;
@@ -708,7 +623,72 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+}
+
+document.addEventListener('DOMContentLoaded', initAdmin, { once: true });
+
+// Notification system
+function showNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+        ${message}
+    `;
+    document.body.appendChild(notification);
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Table sorting function
+function sortTable(header) {
+    const table = header.closest('table');
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    const columnIndex = Array.from(header.parentNode.children).indexOf(header);
+    const isAscending = !header.classList.contains('sort-asc');
+    header.parentNode.querySelectorAll('th').forEach(th => th.classList.remove('sort-asc', 'sort-desc'));
+    header.classList.add(isAscending ? 'sort-asc' : 'sort-desc');
+    rows.sort((a, b) => {
+        const aText = a.children[columnIndex].textContent.trim();
+        const bText = b.children[columnIndex].textContent.trim();
+        const aNum = parseFloat(aText);
+        const bNum = parseFloat(bText);
+        if (!isNaN(aNum) && !isNaN(bNum)) {
+            return isAscending ? aNum - bNum : bNum - aNum;
+        }
+        return isAscending ? aText.localeCompare(bText) : bText.localeCompare(aText);
+    });
+    rows.forEach(row => tbody.appendChild(row));
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        const activeTab = document.querySelector('.tab-content.active');
+        const form = activeTab ? activeTab.querySelector('form') : null;
+        if (form) form.submit();
+    }
+    if (e.key === 'Escape') {
+        document.querySelectorAll('input[type="text"], textarea').forEach(field => {
+            if (document.activeElement === field) {
+                field.blur();
+            }
+        });
+    }
 });
+
+// Header shadow on scroll
+window.addEventListener('scroll', debounce(() => {
+    const header = document.querySelector('.admin-header');
+    if (header) {
+        header.classList.toggle('scrolled', window.scrollY > 0);
+    }
+}, 100));
 </script>
 
 </body>
