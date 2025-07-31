@@ -138,6 +138,17 @@ if (isset($_POST['mensaje']) && trim($_POST['mensaje']) !== '') {
 
     $stmt = $pdo->prepare("INSERT INTO mensajes (conversacion_id, emisor, texto) VALUES (?, 'asistente', ?)");
     $stmt->execute([$conver_id, $respuesta]);
+
+    // Cuando el asistente finaliza el onboarding con <<FIN_INFO>>, extraemos el JSON
+    // y lo almacenamos para que el marketer pueda consultarlo posteriormente.
+    if (preg_match('/<<FIN_INFO>>(.*)$/s', $respuesta, $coincidencias)) {
+        $jsonString = trim($coincidencias[1]);
+        $decoded = json_decode($jsonString, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            $save = $pdo->prepare('INSERT INTO resultados_analisis (usuario_id, analisis) VALUES (?, ?)');
+            $save->execute([$usuario_id, $jsonString]);
+        }
+    }
 }
 
 // Obtener mensajes para mostrar
@@ -150,7 +161,7 @@ $mensajes = $stmt->fetchAll();
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>✨ Celestial Chat</title>
+<title>✨ El chat de Merlin</title>
 <link rel="stylesheet" href="assets/css/chat.css">
 <style>
 :root { --user-color: <?php echo htmlspecialchars($pref['color_preferido']); ?>; }
@@ -162,8 +173,8 @@ $mensajes = $stmt->fetchAll();
 <!-- Header -->
 <header class="header">
     <h1>
-        <i class="fas fa-star star-icon"></i>
-        Celestial Chat
+     <i class="fa-solid fa-hat-wizard"></i>
+        MERLIN
     </h1>
     <div class="header-actions">
         <button class="settings-btn" onclick="toggleSettings()">
@@ -208,7 +219,7 @@ $mensajes = $stmt->fetchAll();
                         <?php if ($m['emisor'] === 'usuario'): ?>
                             <i class="fas fa-user"></i>
                         <?php else: ?>
-                            <i class="fas fa-robot"></i>
+                            <i class="fa-solid fa-hat-wizard"></i>
                         <?php endif; ?>
                     </div>
                     <div class="message-content">
