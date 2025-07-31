@@ -1,0 +1,18 @@
+@import url('admin.css');
+@import url('chat.css');
+@import url('login.css');
+@import url('profile.css');
+@import url('logout.css');
+
+/* Utility classes */
+.mb-1-5 { margin-bottom: 1.5rem; }
+.flex-gap { display: flex; gap: 0.5rem; }
+.flex-gap-wrap { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.flex-gap-col { display: flex; gap: 0.5rem; flex-direction: column; }
+.badge-muted { background: rgba(52, 73, 94, 0.3); color: var(--text-muted); }
+.mw-80 { max-width: 80px; }
+.mw-120 { max-width: 120px; }
+.mw-60 { max-width: 60px; }
+.ml-0-5 { margin-left: 0.5rem; }
+.hidden { display: none; }
+.small-note { font-size: small; }

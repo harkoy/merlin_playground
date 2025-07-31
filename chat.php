@@ -40,106 +40,6 @@ if (!$conver) {
     $conver_id = $conver['id'];
 }
 
-// Borrar mensaje si el usuario lo solicita
-if (isset($_GET['del_msg'])) {
-    $delId = (int)$_GET['del_msg'];
-    $stmt = $pdo->prepare('SELECT m.id FROM mensajes m JOIN conversaciones c ON m.conversacion_id = c.id WHERE m.id = ? AND c.usuario_id = ? LIMIT 1');
-    $stmt->execute([$delId, $usuario_id]);
-    if ($stmt->fetch()) {
-        $del = $pdo->prepare('DELETE FROM mensajes WHERE id = ?');
-        $del->execute([$delId]);
-    }
-    header('Location: chat.php');
-    exit;
-}
-
-// Enviar mensaje
-if (isset($_POST['mensaje']) && trim($_POST['mensaje']) !== '') {
-    $mensaje = trim($_POST['mensaje']);
-    $stmt = $pdo->prepare("INSERT INTO mensajes (conversacion_id, emisor, texto) VALUES (?, 'usuario', ?)");
-    $stmt->execute([$conver_id, $mensaje]);
-
-    // Detectar preferencias de color o tema en el mensaje
-    $mensajeLower = strtolower($mensaje);
-    $colorMap = [
-        'rojo' => '#ff0000',
-        'red' => '#ff0000',
-        'verde' => '#008000',
-        'green' => '#008000',
-        'azul' => '#0000ff',
-        'blue' => '#0000ff',
-        'amarillo' => '#ffff00',
-        'yellow' => '#ffff00',
-        'naranja' => '#ffa500',
-        'orange' => '#ffa500',
-        'violeta' => '#800080',
-        'morado' => '#800080',
-        'purple' => '#800080',
-        'negro' => '#000000',
-        'black' => '#000000',
-        'blanco' => '#ffffff',
-        'white' => '#ffffff',
-        'gris' => '#808080',
-        'gray' => '#808080',
-        'grey' => '#808080',
-        'rosa' => '#ff69b4',
-        'pink' => '#ff69b4',
-        'dorado' => '#D4AF37',
-        'gold' => '#D4AF37'
-    ];
-    $newColor = null;
-    if (preg_match('/#([0-9a-f]{3,6})/i', $mensajeLower, $m)) {
-        $newColor = '#' . $m[1];
-    } elseif (isset($colorMap[$mensajeLower])) {
-        $newColor = $colorMap[$mensajeLower];
-    }
-    if ($newColor) {
-        $pref['color_preferido'] = $newColor;
-        $stmt = $pdo->prepare('UPDATE preferencias_disenio SET color_preferido = ? WHERE usuario_id = ?');
-        $stmt->execute([$newColor, $usuario_id]);
-    }
-    if (strpos($mensajeLower, 'oscuro') !== false || strpos($mensajeLower, 'dark') !== false) {
-        $pref['tema'] = 'dark';
-        $stmt = $pdo->prepare('UPDATE preferencias_disenio SET tema = ? WHERE usuario_id = ?');
-        $stmt->execute(['dark', $usuario_id]);
-    }
-    if (strpos($mensajeLower, 'claro') !== false || strpos($mensajeLower, 'light') !== false) {
-        $pref['tema'] = 'light';
-        $stmt = $pdo->prepare('UPDATE preferencias_disenio SET tema = ? WHERE usuario_id = ?');
-        $stmt->execute(['light', $usuario_id]);
-    }
-
-    // Construir historial para la API
-    $stmt = $pdo->prepare("SELECT emisor, texto FROM mensajes WHERE conversacion_id = ? ORDER BY id");
-    $stmt->execute([$conver_id]);
-    $historial = $stmt->fetchAll();
-    $messages = [];
-    foreach ($historial as $m) {
-        $messages[] = ['role' => $m['emisor'] === 'usuario' ? 'user' : 'assistant', 'content' => $m['texto']];
-    }
-
-    // Prompt inicial y preguntas base si es el primer mensaje
-    if (count($messages) === 1) {
-        $setStmt = $pdo->prepare('SELECT prompt_set_id FROM usuarios WHERE id = ?');
-        $setStmt->execute([$usuario_id]);
-        $setId = $setStmt->fetchColumn();
-        if ($setId) {
-            $pstmt = $pdo->prepare('SELECT role, content FROM prompt_lines WHERE set_id = ? ORDER BY orden');
-            $pstmt->execute([$setId]);
-            $basePrompts = [];
-            foreach ($pstmt->fetchAll() as $p) {
-                $basePrompts[] = ['role' => $p['role'], 'content' => $p['content']];
-            }
-            $messages = array_merge($basePrompts, $messages);
-        }
-    }
-
-    $respuesta = call_openai_api($messages);
-
-    $stmt = $pdo->prepare("INSERT INTO mensajes (conversacion_id, emisor, texto) VALUES (?, 'asistente', ?)");
-    $stmt->execute([$conver_id, $respuesta]);
-}
-
 // Obtener mensajes para mostrar
 $stmt = $pdo->prepare("SELECT id, emisor, texto, fecha_envio FROM mensajes WHERE conversacion_id = ? ORDER BY id");
 $stmt->execute([$conver_id]);
@@ -151,13 +51,10 @@ $mensajes = $stmt->fetchAll();
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>✨ Celestial Chat</title>
-<link rel="stylesheet" href="assets/css/chat.css">
-<style>
-:root { --user-color: <?php echo htmlspecialchars($pref['color_preferido']); ?>; }
-</style>
+<link rel="stylesheet" href="assets/css/app.css">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="<?php echo htmlspecialchars($pref['tema']); ?>">
+<body class="<?php echo htmlspecialchars($pref['tema']); ?>" data-user-color="<?php echo htmlspecialchars($pref['color_preferido']); ?>">
 
 <!-- Header -->
 <header class="header">
@@ -215,7 +112,7 @@ $mensajes = $stmt->fetchAll();
                         <div class="message">
                             <?php echo nl2br(htmlspecialchars($m['texto'])); ?>
                             <div class="message-actions">
-                                <button class="delete-btn" onclick="deleteMessage(<?php echo $m['id']; ?>)">
+                                <button class="delete-btn" onclick="deleteMessage(<?php echo $m['id']; ?>, this)">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -261,42 +158,88 @@ $mensajes = $stmt->fetchAll();
 </nav>
 
 <script>
-// Toggle Settings Panel
+document.addEventListener('DOMContentLoaded', function() {
+    document.documentElement.style.setProperty('--user-color', document.body.dataset.userColor);
+    const form = document.querySelector('.input-form');
+    const input = document.querySelector('.message-input');
+    input.focus();
+    scrollToBottom();
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const text = input.value.trim();
+        if (!text) return;
+        input.value = '';
+        const res = await fetch('chat_api.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({action: 'send', mensaje: text})
+        });
+        const data = await res.json();
+        if (data.error) { alert(data.error); return; }
+        appendMessage('usuario', text, data.user_id);
+        appendMessage('asistente', data.reply, data.assistant_id);
+        scrollToBottom();
+        if (data.fin) { window.dispatchEvent(new Event('fin_info')); }
+    });
+});
+
 function toggleSettings() {
     const panel = document.getElementById('settings-panel');
     panel.style.display = panel.style.display === 'none' || panel.style.display === '' ? 'block' : 'none';
 }
 
-// Delete Message
-function deleteMessage(id) {
-    if (confirm('¿Estás seguro de que quieres eliminar este mensaje?')) {
-        window.location.href = '?del_msg=' + id;
-    }
+function deleteMessage(id, btn) {
+    if (!confirm('¿Estás seguro de que quieres eliminar este mensaje?')) return;
+    fetch('chat_api.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({action: 'delete', id})
+    }).then(r => r.json()).then(data => {
+        if (data.success) {
+            btn.closest('.message-container').remove();
+        }
+    });
 }
 
-// Auto-scroll to bottom
+function appendMessage(role, text, id) {
+    const container = document.createElement('div');
+    container.className = 'message-container ' + (role === 'usuario' ? 'usuario' : 'asistente');
+    const avatar = document.createElement('div');
+    avatar.className = 'message-avatar';
+    avatar.innerHTML = role === 'usuario' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+    const content = document.createElement('div');
+    content.className = 'message-content';
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message';
+    messageDiv.innerHTML = text.replace(/\n/g, '<br>');
+    const actions = document.createElement('div');
+    actions.className = 'message-actions';
+    const delBtn = document.createElement('button');
+    delBtn.className = 'delete-btn';
+    delBtn.innerHTML = '<i class="fas fa-trash"></i>';
+    delBtn.onclick = () => deleteMessage(id, delBtn);
+    actions.appendChild(delBtn);
+    messageDiv.appendChild(actions);
+    const timeDiv = document.createElement('div');
+    timeDiv.className = 'message-time';
+    const now = new Date();
+    timeDiv.textContent = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+    content.appendChild(messageDiv);
+    content.appendChild(timeDiv);
+    container.appendChild(avatar);
+    container.appendChild(content);
+    document.getElementById('chat-window').appendChild(container);
+}
+
 function scrollToBottom() {
     const chatWindow = document.getElementById('chat-window');
     chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    const messageInput = document.querySelector('.message-input');
-    messageInput.focus();
-    scrollToBottom();
-});
-
-document.querySelector('.message-input').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        this.closest('form').submit();
-    }
-});
-
 document.addEventListener('click', function(e) {
     const panel = document.getElementById('settings-panel');
     const settingsBtn = document.querySelector('.settings-btn');
-    
     if (!panel.contains(e.target) && !settingsBtn.contains(e.target)) {
         panel.style.display = 'none';
     }
