@@ -261,10 +261,21 @@ $mensajes = $stmt->fetchAll();
 </nav>
 
 <script>
+// Debounce helper
+function debounce(fn, delay = 100) {
+    let timeout;
+    return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => fn.apply(this, args), delay);
+    };
+}
+
 // Toggle Settings Panel
 function toggleSettings() {
     const panel = document.getElementById('settings-panel');
-    panel.style.display = panel.style.display === 'none' || panel.style.display === '' ? 'block' : 'none';
+    if (panel) {
+        panel.style.display = panel.style.display === 'none' || panel.style.display === '' ? 'block' : 'none';
+    }
 }
 
 // Delete Message
@@ -277,27 +288,30 @@ function deleteMessage(id) {
 // Auto-scroll to bottom
 function scrollToBottom() {
     const chatWindow = document.getElementById('chat-window');
-    chatWindow.scrollTop = chatWindow.scrollHeight;
+    if (chatWindow) {
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
     const messageInput = document.querySelector('.message-input');
-    messageInput.focus();
-    scrollToBottom();
-});
-
-document.querySelector('.message-input').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        this.closest('form').submit();
+    if (messageInput) {
+        messageInput.focus();
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                const form = this.closest('form');
+                if (form) form.submit();
+            }
+        });
     }
+    scrollToBottom();
 });
 
 document.addEventListener('click', function(e) {
     const panel = document.getElementById('settings-panel');
     const settingsBtn = document.querySelector('.settings-btn');
-    
-    if (!panel.contains(e.target) && !settingsBtn.contains(e.target)) {
+    if (panel && settingsBtn && !panel.contains(e.target) && !settingsBtn.contains(e.target)) {
         panel.style.display = 'none';
     }
 });
@@ -305,12 +319,20 @@ document.addEventListener('click', function(e) {
 let typingDots = 0;
 setInterval(() => {
     const input = document.querySelector('.message-input');
-    if (document.activeElement === input && input.value === '') {
+    if (input && document.activeElement === input && input.value === '') {
         typingDots = (typingDots + 1) % 4;
         const dots = '.'.repeat(typingDots);
         input.placeholder = `✨ Escribe tu mensaje mágico aquí${dots}`;
     }
 }, 500);
+
+// Header shadow on scroll
+window.addEventListener('scroll', debounce(() => {
+    const header = document.querySelector('.header');
+    if (header) {
+        header.classList.toggle('scrolled', window.scrollY > 0);
+    }
+}, 100));
 </script>
 
 </body>

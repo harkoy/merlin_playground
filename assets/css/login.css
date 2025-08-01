@@ -1,23 +1,4 @@
-:root {
-    --primary-gold: #D4AF37;
-    --secondary-gold: #FFD700;
-    --deep-blue: #0B1426;
-    --navy-blue: #1A2332;
-    --light-blue: #2C3E50;
-    --accent-blue: #34495E;
-    --text-light: #ECF0F1;
-    --text-muted: #BDC3C7;
-    --shadow-gold: rgba(212, 175, 55, 0.3);
-    --gradient-bg: linear-gradient(135deg, #0B1426 0%, #1A2332 50%, #2C3E50 100%);
-    --error-red: #E74C3C;
-    --success-green: #27AE60;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+@import url('app.css');
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -313,26 +294,28 @@ body {
 }
 
 /* Responsive Design */
+@media (max-width: 1200px) {
+    .login-container { padding: 2rem; }
+}
+
+@media (max-width: 1024px) {
+    .login-container { padding: 1.5rem; }
+}
+
+@media (max-width: 768px) {
+    .login-card { padding: 2rem 1.5rem; }
+}
+
 @media (max-width: 480px) {
-    .login-container {
-        padding: 1rem;
-    }
-    
-    .login-card {
-        padding: 2rem 1.5rem;
-    }
-    
-    .login-title {
-        font-size: 1.8rem;
-    }
-    
-    .form-input {
-        padding: 0.8rem 0.8rem 0.8rem 2.5rem;
-    }
-    
-    .form-icon {
-        left: 0.8rem;
-    }
+    .login-container { padding: 1rem; }
+    .login-card { padding: 1.5rem 1rem; }
+    .login-title { font-size: 1.8rem; }
+    .form-input { padding: 0.8rem 0.8rem 0.8rem 2.5rem; }
+    .form-icon { left: 0.8rem; }
+}
+
+@media (max-width: 320px) {
+    .login-card { padding: 1rem; }
 }
 
 /* Welcome Animation */

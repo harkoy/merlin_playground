@@ -1,30 +1,7 @@
-:root {
-    --primary-gold: #D4AF37;
-    --secondary-gold: #FFD700;
-    --deep-blue: #0B1426;
-    --navy-blue: #1A2332;
-    --light-blue: #2C3E50;
-    --accent-blue: #34495E;
-    --text-light: #ECF0F1;
-    --text-muted: #BDC3C7;
-    --shadow-gold: rgba(212, 175, 55, 0.3);
-    --gradient-bg: linear-gradient(135deg, #0B1426 0%, #1A2332 50%, #2C3E50 100%);
-    --success-green: #27AE60;
-    --warning-orange: #F39C12;
-    --error-red: #E74C3C;
-}
+@import url('app.css');
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
+/* Admin specific styles */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: var(--gradient-bg);
-    color: var(--text-light);
-    min-height: 100vh;
     line-height: 1.6;
 }
 
@@ -122,6 +99,14 @@ body {
     max-width: 1400px;
     margin: 0 auto;
     padding: 2rem;
+}
+
+@media (max-width: 1200px) {
+    .admin-container { padding: 1.5rem; }
+}
+
+@media (max-width: 1024px) {
+    .admin-container { padding: 1rem; }
 }
 
 /* Tabs */
@@ -262,9 +247,9 @@ body {
 
 .form-inline {
     display: flex;
-    gap: 0.5rem;
-    align-items: center;
     flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .form-inline .form-input {
@@ -275,9 +260,21 @@ body {
 /* Stats Cards */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .stat-card {
@@ -356,15 +353,24 @@ body {
     
     .data-table {
         font-size: 0.9rem;
+        overflow-x: auto;
     }
-    
+
     .data-table th, .data-table td {
         padding: 0.5rem;
+        white-space: nowrap;
     }
     
     .form-inline {
         flex-direction: column;
         align-items: stretch;
+    }
+}
+
+@media (max-width: 320px) {
+    .tab-btn {
+        padding: 0.5rem;
+        font-size: 0.9rem;
     }
 }
 
