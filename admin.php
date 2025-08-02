@@ -45,11 +45,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (isset($_POST['add_line'])) {
-        $stmt = $pdo->prepare('INSERT INTO prompt_lines (set_id, role, content, orden) VALUES (?,?,?,?)');
+        $stmt = $pdo->prepare('INSERT INTO prompt_lines (set_id, `role`, content, orden) VALUES (?,?,?,?)');
         $stmt->execute([$selectedSet, $_POST['line_role'], $_POST['line_content'], (int)$_POST['line_order']]);
     }
     if (isset($_POST['edit_line'])) {
-        $stmt = $pdo->prepare('UPDATE prompt_lines SET role = ?, content = ?, orden = ? WHERE id = ?');
+        $stmt = $pdo->prepare('UPDATE prompt_lines SET `role` = ?, content = ?, orden = ? WHERE id = ?');
         $stmt->execute([$_POST['line_role'], $_POST['line_content'], (int)$_POST['line_order'], $_POST['line_id']]);
     }
 }
@@ -72,7 +72,7 @@ $promptSets = $pdo->query('SELECT id, nombre FROM prompt_sets ORDER BY id')->fet
 $questions = $pdo->query('SELECT id, texto_pregunta FROM preguntas_admin ORDER BY id')->fetchAll();
 $promptLines = [];
 if ($selectedSet) {
-    $stmt = $pdo->prepare('SELECT id, role, content, orden FROM prompt_lines WHERE set_id = ? ORDER BY orden');
+    $stmt = $pdo->prepare('SELECT id, `role`, content, orden FROM prompt_lines WHERE set_id = ? ORDER BY orden');
     $stmt->execute([$selectedSet]);
     $promptLines = $stmt->fetchAll();
 }
