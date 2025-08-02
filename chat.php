@@ -277,12 +277,19 @@ function deleteMessage(id) {
 // Auto-scroll to bottom
 function scrollToBottom() {
     const chatWindow = document.getElementById('chat-window');
-    chatWindow.scrollTop = chatWindow.scrollHeight;
+    if (chatWindow) {
+        const originalBehavior = chatWindow.style.scrollBehavior;
+        chatWindow.style.scrollBehavior = 'auto';
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+        chatWindow.style.scrollBehavior = originalBehavior;
+    }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
     const messageInput = document.querySelector('.message-input');
-    messageInput.focus();
+    if (messageInput) {
+        messageInput.focus();
+    }
     scrollToBottom();
 });
 
