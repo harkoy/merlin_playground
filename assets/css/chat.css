@@ -272,14 +272,16 @@ body.light .chat-window::-webkit-scrollbar-track {
     background: var(--message-bg-user);
     color: #1A2332;
     border-bottom-right-radius: 5px;
-    border: 1px solid rgba(212, 175, 55, 0.4);
+    border: 2px solid var(--primary-gold);
     font-weight: 500;
+    box-shadow: 0 4px 10px rgba(212, 175, 55, 0.4);
 }
 
 body.light .message-container.user .message {
     background: var(--message-bg-user);
     color: #1A2332;
     border: 2px solid var(--primary-gold);
+    box-shadow: 0 4px 10px rgba(212, 175, 55, 0.2);
 }
 
 /* Mensaje del asistente con mejor contraste */
@@ -287,15 +289,16 @@ body.light .message-container.user .message {
     background: var(--message-bg-assistant);
     backdrop-filter: blur(10px);
     color: #FFFFFF;
-    border: 1px solid rgba(212, 175, 55, 0.3);
+    border: 2px solid var(--accent-blue);
     border-bottom-left-radius: 5px;
+    box-shadow: 0 4px 10px rgba(52, 73, 94, 0.4);
 }
 
 body.light .message-container.assistant .message {
     background: white;
     color: #212529;
     border: 2px solid #E9ECEF;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .message-actions {
