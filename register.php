@@ -42,5 +42,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </form>
 <p style="font-size:small">Al registrarte aceptas la <a href="privacy.php">política de privacidad</a> y que tus datos sean almacenados.</p>
 <?php if (!empty($error)) echo "<p>$error</p>"; ?>
+<?php include 'branch.php'; ?>
 </body>
 </html>
