@@ -711,5 +711,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<?php include 'branch.php'; ?>
+
 </body>
 </html>

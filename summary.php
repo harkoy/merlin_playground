@@ -35,5 +35,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <button type="submit">Confirmar</button>
 </form>
 <p><a href="chat.php">Solicitar ajustes</a></p>
+<?php include 'branch.php'; ?>
 </body>
 </html>

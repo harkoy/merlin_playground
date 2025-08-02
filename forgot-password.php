@@ -82,5 +82,6 @@ $token = $_GET['token'] ?? null;
         </div>
     </div>
 </div>
+<?php include 'branch.php'; ?>
 </body>
 </html>

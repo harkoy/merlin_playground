@@ -56,5 +56,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <button type="submit">Enviar</button>
 </form>
 <p><a href="chat.php">Volver al chat</a></p>
+<?php include 'branch.php'; ?>
 </body>
 </html>

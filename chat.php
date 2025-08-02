@@ -190,5 +190,7 @@ document.querySelector('.message-input').addEventListener('keypress', function(e
 });
 </script>
 
+<?php include 'branch.php'; ?>
+
 </body>
 </html>
