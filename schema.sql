@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS prompt_sets (
 CREATE TABLE IF NOT EXISTS prompt_lines (
     id INT AUTO_INCREMENT PRIMARY KEY,
     set_id INT NOT NULL,
-    role ENUM('system','assistant','user') NOT NULL,
+    `role` ENUM('system','assistant','user') NOT NULL,
     content TEXT NOT NULL,
     orden INT DEFAULT 0,
     FOREIGN KEY (set_id) REFERENCES prompt_sets(id) ON DELETE CASCADE
@@ -130,7 +130,7 @@ CREATE TABLE IF NOT EXISTS prompt_sets (
 CREATE TABLE IF NOT EXISTS prompt_lines (
     id INT AUTO_INCREMENT PRIMARY KEY,
     set_id INT NOT NULL,
-    role ENUM('system','assistant','user') NOT NULL,
+    `role` ENUM('system','assistant','user') NOT NULL,
     content TEXT NOT NULL,
     orden INT DEFAULT 0,
     FOREIGN KEY (set_id) REFERENCES prompt_sets(id) ON DELETE CASCADE

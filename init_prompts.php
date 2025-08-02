@@ -11,7 +11,7 @@ if ($exists > 0) {
 $promptSets = include 'prompts.php';
 
 $insertSet = $pdo->prepare('INSERT INTO prompt_sets (nombre) VALUES (?)');
-$insertLine = $pdo->prepare('INSERT INTO prompt_lines (set_id, role, content, orden) VALUES (?, ?, ?, ?)');
+$insertLine = $pdo->prepare('INSERT INTO prompt_lines (set_id, `role`, content, orden) VALUES (?, ?, ?, ?)');
 
 $totalLines = 0;
 foreach ($promptSets as $name => $messages) {

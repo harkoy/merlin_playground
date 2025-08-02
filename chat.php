@@ -124,7 +124,7 @@ if (isset($_POST['mensaje']) && trim($_POST['mensaje']) !== '') {
         $setStmt->execute([$usuario_id]);
         $setId = $setStmt->fetchColumn();
         if ($setId) {
-            $pstmt = $pdo->prepare('SELECT role, content FROM prompt_lines WHERE set_id = ? ORDER BY orden');
+            $pstmt = $pdo->prepare('SELECT `role`, content FROM prompt_lines WHERE set_id = ? ORDER BY orden');
             $pstmt->execute([$setId]);
             $basePrompts = [];
             foreach ($pstmt->fetchAll() as $p) {
