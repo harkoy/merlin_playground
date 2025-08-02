@@ -10,6 +10,11 @@ if (!isset($_SESSION['usuario_id'])) {
 
 $usuario_id = $_SESSION['usuario_id'];
 
+// Obtener información del perfil del usuario
+$stmt = $pdo->prepare("SELECT nombre, apellido, empresa, email, telefono FROM usuarios WHERE id = ? LIMIT 1");
+$stmt->execute([$usuario_id]);
+$perfilUsuario = $stmt->fetch();
+
 // Obtener preferencias de diseño o crear valores por defecto
 $stmt = $pdo->prepare("SELECT tema, color_preferido FROM preferencias_disenio WHERE usuario_id = ? LIMIT 1");
 $stmt->execute([$usuario_id]);
@@ -118,20 +123,38 @@ if (isset($_POST['mensaje']) && trim($_POST['mensaje']) !== '') {
         $messages[] = ['role' => $m['emisor'] === 'usuario' ? 'user' : 'assistant', 'content' => $m['texto']];
     }
 
+    // Agregar información de perfil como mensaje del sistema
+    $perfilTexto = "Perfil del usuario:\n";
+    if (!empty($perfilUsuario['nombre']) || !empty($perfilUsuario['apellido'])) {
+        $perfilTexto .= "Nombre: " . trim(($perfilUsuario['nombre'] ?? '') . ' ' . ($perfilUsuario['apellido'] ?? '')) . "\n";
+    }
+    if (!empty($perfilUsuario['empresa'])) {
+        $perfilTexto .= "Empresa: {$perfilUsuario['empresa']}\n";
+    }
+    if (!empty($perfilUsuario['email'])) {
+        $perfilTexto .= "Correo: {$perfilUsuario['email']}\n";
+    }
+    if (!empty($perfilUsuario['telefono'])) {
+        $perfilTexto .= "Teléfono: {$perfilUsuario['telefono']}\n";
+    }
+    $perfilMsg = ['role' => 'system', 'content' => trim($perfilTexto)];
+
     // Prompt inicial y preguntas base si es el primer mensaje
     if (count($messages) === 1) {
         $setStmt = $pdo->prepare('SELECT prompt_set_id FROM usuarios WHERE id = ?');
         $setStmt->execute([$usuario_id]);
         $setId = $setStmt->fetchColumn();
+        $basePrompts = [];
         if ($setId) {
             $pstmt = $pdo->prepare('SELECT role, content FROM prompt_lines WHERE set_id = ? ORDER BY orden');
             $pstmt->execute([$setId]);
-            $basePrompts = [];
             foreach ($pstmt->fetchAll() as $p) {
                 $basePrompts[] = ['role' => $p['role'], 'content' => $p['content']];
             }
-            $messages = array_merge($basePrompts, $messages);
         }
+        $messages = array_merge($basePrompts, [$perfilMsg], $messages);
+    } else {
+        array_unshift($messages, $perfilMsg);
     }
 
     $respuesta = call_openai_api($messages);
