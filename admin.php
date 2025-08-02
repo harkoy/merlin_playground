@@ -2,7 +2,7 @@
 session_start();
 require 'db.php';
 
-if (!isset($_SESSION['usuario_id']) || empty($_SESSION['es_admin'])) {
+if (!is_admin()) {
     header('Location: login.php');
     exit;
 }
@@ -52,6 +52,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare('UPDATE prompt_lines SET role = ?, content = ?, orden = ? WHERE id = ?');
         $stmt->execute([$_POST['line_role'], $_POST['line_content'], (int)$_POST['line_order'], $_POST['line_id']]);
     }
+
+    // Branding CRUD
+    if (isset($_POST['add_brand_question'])) {
+        $stmt = $pdo->prepare('INSERT INTO branding_questions (texto, orden) VALUES (?, ?)');
+        $stmt->execute([$_POST['question_text'], (int)$_POST['question_order']]);
+    }
+    if (isset($_POST['edit_brand_question'])) {
+        $stmt = $pdo->prepare('UPDATE branding_questions SET texto = ?, orden = ? WHERE id = ?');
+        $stmt->execute([$_POST['question_text'], (int)$_POST['question_order'], $_POST['question_id']]);
+    }
+    if (isset($_POST['save_intro'])) {
+        $stmt = $pdo->prepare('UPDATE branding_intro SET mensaje = ? WHERE id = 1');
+        $stmt->execute([$_POST['intro_mensaje']]);
+    }
 }
 if (isset($_GET['del_question'])) {
     $stmt = $pdo->prepare('DELETE FROM preguntas_admin WHERE id = ?');
@@ -65,6 +79,11 @@ if (isset($_GET['del_set'])) {
 if (isset($_GET['del_line']) && $selectedSet) {
     $stmt = $pdo->prepare('DELETE FROM prompt_lines WHERE id = ? AND set_id = ?');
     $stmt->execute([$_GET['del_line'], $selectedSet]);
+}
+
+if (isset($_GET['del_brand_question'])) {
+    $stmt = $pdo->prepare('DELETE FROM branding_questions WHERE id = ?');
+    $stmt->execute([$_GET['del_brand_question']]);
 }
 
 $users = $pdo->query('SELECT id, nombre, apellido, email, telefono, es_admin, prompt_set_id FROM usuarios')->fetchAll();
@@ -85,6 +104,10 @@ if ($selectedSet) {
     $result = $stmt->fetch();
     $selectedSetName = $result ? $result['nombre'] : '';
 }
+
+$brandQuestions = $pdo->query('SELECT id, texto, orden FROM branding_questions ORDER BY orden')->fetchAll();
+$brandIntro = $pdo->query('SELECT id, mensaje FROM branding_intro LIMIT 1')->fetch();
+$brandBriefs = $pdo->query('SELECT id, conversacion_id, confirmado FROM branding_briefs ORDER BY created_at DESC')->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -454,6 +477,47 @@ if ($selectedSet) {
         <?php endif; ?>
     </div>
 </div>
+
+<section>
+    <h2>Branding</h2>
+    <h3>Mensaje de introducción</h3>
+    <form method="post">
+        <textarea name="intro_mensaje" rows="3" class="form-textarea"><?php echo htmlspecialchars($brandIntro['mensaje'] ?? ''); ?></textarea>
+        <button type="submit" name="save_intro" class="btn btn-success"><i class="fas fa-save"></i> Guardar</button>
+    </form>
+
+    <h3>Preguntas</h3>
+    <ul class="brand-questions">
+        <?php foreach ($brandQuestions as $q): ?>
+        <li>
+            <?php echo htmlspecialchars($q['orden'] . '. ' . $q['texto']); ?>
+            <a href="?del_brand_question=<?php echo $q['id']; ?>" class="btn btn-danger btn-sm">Eliminar</a>
+        </li>
+        <?php endforeach; ?>
+    </ul>
+    <form method="post" class="brand-form">
+        <input type="text" name="question_text" placeholder="Nueva pregunta" class="form-input">
+        <input type="number" name="question_order" placeholder="Orden" class="form-input" style="width:80px;">
+        <button type="submit" name="add_brand_question" class="btn btn-primary">Agregar</button>
+    </form>
+
+    <h3>Briefs</h3>
+    <table class="data-table">
+        <thead>
+            <tr><th>ID</th><th>Conversación</th><th>Estado</th><th>Reporte</th></tr>
+        </thead>
+        <tbody>
+        <?php foreach ($brandBriefs as $b): ?>
+        <tr>
+            <td><?php echo $b['id']; ?></td>
+            <td><?php echo $b['conversacion_id']; ?></td>
+            <td><span class="badge-status <?php echo $b['confirmado'] ? 'confirmado' : 'pendiente'; ?>"><?php echo $b['confirmado'] ? '✓' : '⏳'; ?></span></td>
+            <td><?php if ($b['confirmado']) { ?><a href="branding_report.php?id=<?php echo $b['id']; ?>">Ver</a><?php } ?></td>
+        </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+</section>
 
 <script>
 // Tab functionality

@@ -33,3 +33,18 @@ historial.
 Cada usuario puede actualizar o eliminar sus datos personales desde la página
 `profile.php` una vez iniciada la sesión. Si se elimina la cuenta, se borran su
 perfil, preferencias y conversaciones asociadas.
+
+## Branding Brief
+
+El sistema ahora incluye un flujo de briefing de marca. El asistente realiza 20 preguntas y cuando reúne toda la información responde con `[[RESUMEN_COMPLETO]]` seguido de un JSON con los datos recopilados. La página `summary.php` muestra este resumen y permite confirmarlo.
+
+Al pulsar **Confirmar**, se envía `confirmado` al chat y el asistente responde con `[[CONFIRMADO]]`, generando un informe final que queda almacenado.
+
+Ejecuta `php init_branding.php` para crear las tablas (`branding_briefs`, `branding_questions`, `branding_intro`) e insertar las preguntas y mensajes iniciales.
+
+Los tokens especiales del flujo son:
+
+- `[[RESUMEN_COMPLETO]]`: indica que el asistente envió el JSON del brief.
+- `[[CONFIRMADO]]`: señala que el usuario cerró y confirmó el brief.
+
+Las credenciales de base de datos y `OPENAI_API_KEY` deben configurarse en un archivo `.env` (ver `.env.example`).

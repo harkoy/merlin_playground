@@ -154,3 +154,58 @@ ALTER TABLE usuarios
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 >>>>>>> origin/codex/fix-syntax-error-in-mysql-query
+
+-- Branding brief tables
+CREATE TABLE IF NOT EXISTS branding_briefs (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  conversacion_id INT NOT NULL,
+  resumen_json JSON NOT NULL,
+  confirmado TINYINT(1) DEFAULT 0,
+  final_report LONGTEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (conversacion_id) REFERENCES conversaciones(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS branding_questions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  texto VARCHAR(255) NOT NULL,
+  orden INT NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS branding_intro (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  mensaje TEXT NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO branding_questions (texto, orden) VALUES
+('¿Cuál es el nombre de la marca?',1),
+('¿Cuál es el eslogan?',2),
+('¿Cuál es la misión de la empresa?',3),
+('¿Cuál es la visión de la empresa?',4),
+('¿Cuál es el público objetivo principal?',5),
+('¿Cuáles son los valores de la marca?',6),
+('¿Qué productos o servicios ofrece?',7),
+('¿Qué diferencia a la marca de la competencia?',8),
+('¿Cuál es el tono de comunicación deseado?',9),
+('¿Qué colores representan a la marca?',10),
+('¿Qué tipografías se prefieren?',11),
+('¿Existe un logotipo actual?',12),
+('¿Cómo se describe la personalidad de la marca?',13),
+('¿Qué emociones quiere transmitir la marca?',14),
+('¿Qué medios de comunicación utiliza la marca?',15),
+('¿Cuál es el presupuesto estimado de marketing?',16),
+('¿Hay restricciones legales a considerar?',17),
+('¿Cuáles son los objetivos a corto plazo?',18),
+('¿Cuáles son los objetivos a largo plazo?',19),
+('¿Hay ejemplos de marcas que te inspiren?',20);
+
+INSERT INTO branding_intro (mensaje) VALUES
+('Bienvenido al cuestionario de branding. Responde las siguientes preguntas para crear tu brief.');
+
+INSERT INTO prompt_lines (set_id, role, content, orden)
+SELECT 1, 'system', 'Eres un asistente de branding. Realiza 20 preguntas obligatorias para elaborar un brief. Cuando tengas suficientes datos responde con [[RESUMEN_COMPLETO]] seguido de un JSON con las respuestas. Tras recibir "confirmado" responde con [[CONFIRMADO]].', 0
+WHERE NOT EXISTS (
+    SELECT 1 FROM prompt_lines WHERE role = 'system' AND content LIKE '%[[RESUMEN_COMPLETO]]%'
+);
+
