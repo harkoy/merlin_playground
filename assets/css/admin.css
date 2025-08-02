@@ -417,3 +417,13 @@ body {
     color: var(--secondary-gold);
     margin-bottom: 0.5rem;
 }
+
+.badge-status {
+    display:inline-block;
+    padding:2px 6px;
+    border-radius:4px;
+    color:#fff;
+    font-size:0.8rem;
+}
+.badge-status.confirmado {background:#28a745;}
+.badge-status.pendiente {background:#6c757d;}

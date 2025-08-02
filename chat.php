@@ -134,16 +134,64 @@ if (isset($_POST['mensaje']) && trim($_POST['mensaje']) !== '') {
         }
     }
 
+    // Ensure system prompt
+    $hasSystem = false;
+    foreach ($messages as $m) {
+        if ($m['role'] === 'system') { $hasSystem = true; break; }
+    }
+    if (!$hasSystem) {
+        $sys = $pdo->query("SELECT content FROM prompt_lines WHERE role='system' ORDER BY id LIMIT 1")->fetchColumn();
+        if ($sys) {
+            array_unshift($messages, ['role' => 'system', 'content' => $sys]);
+        }
+    }
+
     $respuesta = call_openai_api($messages);
 
     $stmt = $pdo->prepare("INSERT INTO mensajes (conversacion_id, emisor, texto) VALUES (?, 'asistente', ?)");
     $stmt->execute([$conver_id, $respuesta]);
+
+    // Detect special tokens
+    if (strpos($respuesta, '[[RESUMEN_COMPLETO]]') !== false) {
+        if (preg_match('/\[\[RESUMEN_COMPLETO\]\](.*)$/s', $respuesta, $match)) {
+            $json = trim($match[1]);
+            $data = json_decode($json, true);
+            if ($data !== null) {
+                $ins = $pdo->prepare('INSERT INTO branding_briefs (conversacion_id, resumen_json) VALUES (?, ?)');
+                $ins->execute([$conver_id, json_encode($data)]);
+                $briefId = $pdo->lastInsertId();
+                header('Location: summary.php?id=' . $briefId);
+                exit;
+            }
+        }
+    }
+
+    if (strpos($respuesta, '[[CONFIRMADO]]') !== false) {
+        $bstmt = $pdo->prepare('SELECT id, resumen_json FROM branding_briefs WHERE conversacion_id = ? ORDER BY id DESC LIMIT 1');
+        $bstmt->execute([$conver_id]);
+        if ($brief = $bstmt->fetch()) {
+            $pdo->prepare('UPDATE branding_briefs SET confirmado = 1 WHERE id = ?')->execute([$brief['id']]);
+            $report = call_openai_api([
+                ['role' => 'system', 'content' => 'Elabora informe completo del branding a partir del siguiente JSON'],
+                ['role' => 'user', 'content' => $brief['resumen_json']]
+            ]);
+            $pdo->prepare('UPDATE branding_briefs SET final_report = ? WHERE id = ?')->execute([$report, $brief['id']]);
+        }
+        header('Location: thankyou.php');
+        exit;
+    }
 }
 
 // Obtener mensajes para mostrar
 $stmt = $pdo->prepare("SELECT id, emisor, texto, fecha_envio FROM mensajes WHERE conversacion_id = ? ORDER BY id");
 $stmt->execute([$conver_id]);
 $mensajes = $stmt->fetchAll();
+
+// Progress bar data
+$qTotal = $pdo->query('SELECT COUNT(*) FROM branding_questions')->fetchColumn();
+$briefStmt = $pdo->prepare('SELECT resumen_json FROM branding_briefs WHERE conversacion_id = ? ORDER BY id DESC LIMIT 1');
+$briefStmt->execute([$conver_id]);
+$briefData = $briefStmt->fetchColumn();
 ?>
 <!DOCTYPE html>
 <html lang="es" class="<?php echo htmlspecialchars($pref['tema']); ?>">
@@ -191,6 +239,12 @@ $mensajes = $stmt->fetchAll();
         </div>
     </form>
 </div>
+
+<?php if ($briefData): ?>
+<div class="progress" style="width:100%;background:#ccc;height:10px;margin:10px 0;">
+    <div id="progress-bar" data-json='<?= htmlspecialchars($briefData, ENT_QUOTES) ?>' data-total="<?= (int)$qTotal ?>" style="height:10px;background:#4caf50;width:0;"></div>
+</div>
+<?php endif; ?>
 
 <!-- Chat Container -->
 <div class="chat-container">
@@ -284,6 +338,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const messageInput = document.querySelector('.message-input');
     messageInput.focus();
     scrollToBottom();
+    const bar = document.getElementById('progress-bar');
+    if (bar) {
+        try {
+            const data = JSON.parse(bar.dataset.json || '{}');
+            const total = parseInt(bar.dataset.total, 10);
+            const answered = Object.keys(data).filter(k => data[k]).length;
+            const pct = total ? Math.round(answered / total * 100) : 0;
+            bar.style.width = pct + '%';
+        } catch (e) {}
+    }
 });
 
 document.querySelector('.message-input').addEventListener('keypress', function(e) {
