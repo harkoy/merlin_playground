@@ -207,5 +207,7 @@ function animateCard() {
 animateCard();
 </script>
 
+<?php include 'branch.php'; ?>
+
 </body>
 </html>
